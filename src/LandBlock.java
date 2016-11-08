@@ -13,6 +13,18 @@ public class LandBlock extends GeoBlock {
 	{
 		construction = b;
 	}
+	
+	void demolishBuilding()
+	{
+		if (construction != null)
+		{
+			construction.demolish();
+		}
+	}	
+
+	public Building getConstruction() {
+		return construction;
+	}
 
 	private Building construction;
 

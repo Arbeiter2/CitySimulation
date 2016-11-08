@@ -1,7 +1,6 @@
 import java.awt.Point;
 
 public class Building {
-
 	public Building(LandBlock block, int constrMonth)
 	{
 		constructionMonth = constrMonth;
@@ -11,6 +10,7 @@ public class Building {
 		height = width = 0;
 	}
 	
+	private LandBlock location;
 
 	protected int height;
 	public int getHeight() {
@@ -23,9 +23,6 @@ public class Building {
 		return width;
 	}
 
-
-	private LandBlock location;
-	
 	public void demolish()
 	{
 		location.addBuilding(null);
@@ -37,12 +34,12 @@ public class Building {
 		return constructionMonth;
 	}
 
+	private double constructionCost;
 	public double getConstructionCost()
 	{
 		return constructionCost;
 	}
 	
-	private double constructionCost;
 	private double value;
 	public double getValue()
 	{
