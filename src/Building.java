@@ -8,12 +8,22 @@ public class Building {
 		location = block;
 		location.addBuilding(this);
 		constructionCost = 0;
-		length = width = 0;
+		height = width = 0;
 	}
 	
-	
-	private int length;
-	private int width;
+
+	protected int height;
+	public int getHeight() {
+		return height;
+	}
+
+
+	protected int width;
+	public int getWidth() {
+		return width;
+	}
+
+
 	private LandBlock location;
 	
 	public void demolish()

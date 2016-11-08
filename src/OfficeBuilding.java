@@ -1,0 +1,16 @@
+
+public class OfficeBuilding extends CommercialBuilding {
+
+	public static final int HEIGHT = 4;
+	public static final int WIDTH = 4;
+	public static final int CAPACITY = 240;
+	public static final int CONSTRUCTION_COST = 1600000;
+	
+	public OfficeBuilding(LandBlock block, int constrMonth) 
+	{
+		super(block, constrMonth);
+		height = OfficeBuilding.HEIGHT;
+		width = OfficeBuilding.WIDTH;
+		capacity = OfficeBuilding.CAPACITY;
+	}
+}
