@@ -1,8 +1,13 @@
-
+/**
+ * Buildings where commercial activity takes place
+ * 
+ * @author dwgreenidge
+ *
+ */
 public class CommercialBuilding extends OccupiedBuilding {
 
-	public CommercialBuilding(LandBlock block, int constrMonth) {
-		super(block, constrMonth);
+	public CommercialBuilding(int constrMonth) {
+		super(constrMonth, CitySimulation.TaxSource.COMMERCIAL);
 	}
 
 }

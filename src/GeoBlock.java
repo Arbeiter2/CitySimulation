@@ -1,5 +1,11 @@
 import java.awt.Point;
 
+/**
+ * A block of size 50m x 50m in the simulation
+ * 
+ * @author dwgreenidge
+ *
+ */
 public class GeoBlock {
 
 	private	Point location;

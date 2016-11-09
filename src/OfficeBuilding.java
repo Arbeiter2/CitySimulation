@@ -6,9 +6,9 @@ public class OfficeBuilding extends CommercialBuilding {
 	public static final int CAPACITY = 240;
 	public static final int CONSTRUCTION_COST = 1600000;
 	
-	public OfficeBuilding(LandBlock block, int constrMonth) 
+	public OfficeBuilding(int constrMonth) 
 	{
-		super(block, constrMonth);
+		super(constrMonth);
 		height = OfficeBuilding.HEIGHT;
 		width = OfficeBuilding.WIDTH;
 		capacity = OfficeBuilding.CAPACITY;

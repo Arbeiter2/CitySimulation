@@ -1,4 +1,7 @@
-
+/**
+ * The equivalent of many stores in one place.
+ * 
+ */
 public class ShoppingMall extends CommercialBuilding {
 
 	public static final int HEIGHT = 8;
@@ -6,9 +9,9 @@ public class ShoppingMall extends CommercialBuilding {
 	public static final int CAPACITY = 600;
 	public static final int CONSTRUCTION_COST = 3000000;
 	
-	public ShoppingMall(LandBlock block, int constrMonth) 
+	public ShoppingMall(int constrMonth) 
 	{
-		super(block, constrMonth);
+		super(constrMonth);
 		height = ShoppingMall.HEIGHT;
 		width = ShoppingMall.WIDTH;
 		capacity = ShoppingMall.CAPACITY;

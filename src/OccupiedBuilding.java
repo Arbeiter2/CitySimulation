@@ -1,10 +1,21 @@
+/**
+ * A building in which people live or work, and a source of
+ * tax revenue.
+ * 
+ * @author dwgreenidge
+ *
+ */
 public class OccupiedBuilding extends Building {
+	
+	// all occupied buildings have a tax revenue type
+	CitySimulation.TaxSource taxClass;
 
-	public OccupiedBuilding(LandBlock block, int constrMonth) 
+	public OccupiedBuilding(int constrMonth, CitySimulation.TaxSource tax_class) 
 	{
-		super(block, constrMonth);
+		super(constrMonth);
 		capacity = 0;
 		numberOfOccupants = 0;
+		taxClass = tax_class;
 	}
 	
 	int numberOfOccupants;
@@ -18,10 +29,4 @@ public class OccupiedBuilding extends Building {
 	{
 		return capacity;
 	}
-	
-	double getTaxRevenue()
-	{
-		return CitySimulation.TAX_RATE * this.getNumberOfOccupants();
-	}
-
 }

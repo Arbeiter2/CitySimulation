@@ -1,6 +1,6 @@
 public class ResidentialBuilding extends OccupiedBuilding {
 
-	public ResidentialBuilding(LandBlock block, int constrMonth) {
-		super(block, constrMonth);
+	public ResidentialBuilding(int constrMonth) {
+		super(constrMonth, CitySimulation.TaxSource.RESIDENTIAL);
 	}
 }

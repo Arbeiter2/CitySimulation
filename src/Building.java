@@ -1,16 +1,23 @@
 import java.awt.Point;
 
 public class Building {
-	public Building(LandBlock block, int constrMonth)
+	public Building(int constrMonth)
 	{
 		constructionMonth = constrMonth;
-		location = block;
-		location.addBuilding(this);
 		constructionCost = 0;
 		height = width = 0;
 	}
 	
+	// LandBlock containing building
 	private LandBlock location;
+
+	public LandBlock getLocation() {
+		return location;
+	}
+
+	public void setLocation(LandBlock loc) {
+		location = loc;
+	}
 
 	protected int height;
 	public int getHeight() {
