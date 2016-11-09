@@ -1,5 +1,10 @@
 import java.awt.Point;
-
+/**
+ * A block on which construction is possible.
+ * 
+ * @author Delano Greenidge
+ * @see GeoBlock
+ */
 public class LandBlock extends GeoBlock {
 
 	LandBlock(Point p, VegetationType v)
@@ -26,6 +31,9 @@ public class LandBlock extends GeoBlock {
 		return construction;
 	}
 
+	/**
+	 * A block can contain at most one (1) building
+	 */
 	private Building construction;
 
 	//public double getConstructionMultiplier();
