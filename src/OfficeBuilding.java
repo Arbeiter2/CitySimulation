@@ -8,7 +8,7 @@ public class OfficeBuilding extends CommercialBuilding {
 	
 	public OfficeBuilding(int constrMonth) 
 	{
-		super(constrMonth);
+		super(constrMonth, CONSTRUCTION_COST);
 		height = OfficeBuilding.HEIGHT;
 		width = OfficeBuilding.WIDTH;
 		capacity = OfficeBuilding.CAPACITY;

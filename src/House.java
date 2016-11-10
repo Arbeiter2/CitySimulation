@@ -1,11 +1,18 @@
-public class House extends ResidentialBuilding {
+/**
+ * A residence for a single family
+ * 
+ * @author dwgreenidge
+ *
+ */
+public class House extends ResidentialBuilding 
+{
 	public static final int HEIGHT = 1;
 	public static final int WIDTH = 1;
 	public static final int CAPACITY = 4;
 	public static final int CONSTRUCTION_COST = 80000;
 	
 	public House(int constrMonth) {
-		super(constrMonth);
+		super(constrMonth, CONSTRUCTION_COST);
 		height = House.HEIGHT;
 		width = House.WIDTH;
 		capacity = CAPACITY;

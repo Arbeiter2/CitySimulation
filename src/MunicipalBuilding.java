@@ -15,9 +15,9 @@ public class MunicipalBuilding extends Building {
 	}
 
 
-	public MunicipalBuilding(int constrMonth, int cost) 
+	public MunicipalBuilding(int constrMonth, int basicCost, int mthlyCost) 
 	{
-		super(constrMonth);
-		monthlyCost = cost;
+		super(constrMonth, basicCost);
+		monthlyCost = mthlyCost;
 	}
 }

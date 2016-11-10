@@ -2,10 +2,14 @@ import java.awt.Point;
 import java.util.HashMap;
 
 public class CitySimulation {
+	
 	// default tax rates
 	public static double DEFAULT_RESIDENTIAL_TAX_RATE = 0.25;
 	public static double DEFAULT_COMMERCIAL_TAX_RATE = 0.25;
 	public static double DEFAULT_INDUSTRIAL_TAX_RATE = 0.25;
+
+	// building costs and running costs rise
+	public static double MONTHLY_INFLATION_RATE = 0.001652;
 
 	// tax revenue types
 	public enum TaxSource { RESIDENTIAL, COMMERCIAL, INDUSTRIAL };
@@ -21,6 +25,7 @@ public class CitySimulation {
 		if (rate > 0.00 && rate < 1.00)
 			this.taxRates.put(taxClass, rate);
 	}
+	
 	
 	// grid of blocks representing map
 	GeoBlock[][] grid;
@@ -46,6 +51,11 @@ public class CitySimulation {
 		taxRates.put(TaxSource.INDUSTRIAL, DEFAULT_INDUSTRIAL_TAX_RATE);
 	}
 	
+	/**
+	 * Place a block into the grid
+	 * 
+	 * @param g non-null GeoBlock
+	 */
 	public void placeBlock(GeoBlock g)
 	{
 		if (g == null) return;
@@ -54,7 +64,17 @@ public class CitySimulation {
 		grid[p.x][p.y] = g;
 	}
 	
-	// place a building on a LandBlock
+
+	/**
+	 * Place a building on a LandBlock.
+	 * 
+	 * Every surrounding block must be LandBlock 
+	 * clear of buildings.
+	 * 
+	 * @param b Building
+	 * @param p grid location of top left corner
+	 * @return true successful; false failed
+	 */
 	public boolean placeBuilding(Building b, Point p)
 	{
 		if (b == null || p == null) 
@@ -68,12 +88,17 @@ public class CitySimulation {
 			{
 				// we can only build on a land block
 				if (!(grid[x][y] instanceof LandBlock))
-					return false;				
+					return false;	
+				
+				// block must be clear
 				if (((LandBlock) grid[x][y]).getConstruction() != null)
 					return false;
 			}
 		}
 		
+		// set Building location to point p
+		b.setLocation((LandBlock)  grid[p.x][p.y]);
+
 		// set every LandBlock to occupied
 		for (int x=p.x; x < b.getWidth(); x++)
 		{

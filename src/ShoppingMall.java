@@ -11,7 +11,7 @@ public class ShoppingMall extends CommercialBuilding {
 	
 	public ShoppingMall(int constrMonth) 
 	{
-		super(constrMonth);
+		super(constrMonth, CONSTRUCTION_COST);
 		height = ShoppingMall.HEIGHT;
 		width = ShoppingMall.WIDTH;
 		capacity = ShoppingMall.CAPACITY;

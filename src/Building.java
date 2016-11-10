@@ -1,10 +1,18 @@
 import java.awt.Point;
 
-public class Building {
-	public Building(int constrMonth)
+/**
+ * A building for a LandBlock
+ *
+ * 
+ * @author dwgreenidge
+ *
+ */
+abstract public class Building {
+	public Building(int constrMonth, int basicCost)
 	{
 		constructionMonth = constrMonth;
-		constructionCost = 0;
+		basicConstructionCost = basicCost;
+		constructionCost = constrMonth * CitySimulation.MONTHLY_INFLATION_RATE * basicConstructionCost;
 		height = width = 0;
 	}
 	
@@ -42,6 +50,8 @@ public class Building {
 	}
 
 	private double constructionCost;
+	private double basicConstructionCost;
+
 	public double getConstructionCost()
 	{
 		return constructionCost;
@@ -57,5 +67,8 @@ public class Building {
 	{
 		
 	}
-	
+
+	public double getBasicConstructionCost() {
+		return basicConstructionCost;
+	}
 }

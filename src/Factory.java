@@ -12,7 +12,10 @@ public class Factory extends OccupiedBuilding {
 	public static final int CONSTRUCTION_COST = 5000000;
 	
 	public Factory(int constrMonth) {
-		super(constrMonth, CitySimulation.TaxSource.INDUSTRIAL);
+		super(constrMonth, CONSTRUCTION_COST, CitySimulation.TaxSource.INDUSTRIAL);
+		height = House.HEIGHT;
+		width = House.WIDTH;
+		capacity = CAPACITY;
 	}
 
 }
