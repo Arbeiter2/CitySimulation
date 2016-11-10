@@ -12,8 +12,11 @@ abstract public class Building {
 	{
 		constructionMonth = constrMonth;
 		basicConstructionCost = basicCost;
-		constructionCost = constrMonth * CitySimulation.MONTHLY_INFLATION_RATE * basicConstructionCost;
+		
+		// construction costs rise with inflation
+		constructionCost = constrMonth * (1.0 + CitySimulation.MONTHLY_INFLATION_RATE) * basicConstructionCost;
 		height = width = 0;
+		capacity = 0;
 	}
 	
 	// LandBlock containing building
@@ -40,27 +43,42 @@ abstract public class Building {
 
 	public void demolish()
 	{
-		location.addBuilding(null);
 		location = null;
 	}
 
+	// month of construction, used for calculating inflation
 	private int constructionMonth;
 	public int getConstructionMonth() {
 		return constructionMonth;
 	}
 
-	private double constructionCost;
+	// basic cost of construction before inflation
 	private double basicConstructionCost;
+
+	public double getBasicConstructionCost() {
+		return basicConstructionCost;
+	}
+	
+	// cost of construction including inflation
+	private double constructionCost;
 
 	public double getConstructionCost()
 	{
 		return constructionCost;
 	}
+
 	
-	private double value;
-	public double getValue()
+	/**
+	 * For tax revenue buildings like homes or offices, maximum number
+	 * of families/workers they can contain;
+	 * 
+	 * For municipal buildings (fire/police stations, hospitals, etc.) 
+	 * maximum number of people they can serve
+	 */
+	protected int capacity;
+	int getCapacity()
 	{
-		return value;
+		return capacity;
 	}
 	
 	public void tick(int month)
@@ -68,7 +86,4 @@ abstract public class Building {
 		
 	}
 
-	public double getBasicConstructionCost() {
-		return basicConstructionCost;
-	}
 }

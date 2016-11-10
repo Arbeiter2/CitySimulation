@@ -4,7 +4,7 @@
  * @author dwgreenidge
  *
  */
-public class MunicipalBuilding extends Building {
+abstract public class MunicipalBuilding extends Building {
 	
 	// monthly running cost
 	private int monthlyCost; 
@@ -19,5 +19,6 @@ public class MunicipalBuilding extends Building {
 	{
 		super(constrMonth, basicCost);
 		monthlyCost = mthlyCost;
+		capacity = 0;
 	}
 }

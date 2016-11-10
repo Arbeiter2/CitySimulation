@@ -16,7 +16,8 @@ public class LandBlock extends GeoBlock {
 	
 	void addBuilding(Building b)
 	{
-		construction = b;
+		if (construction == null && b != null)
+			construction = b;
 	}
 	
 	void demolishBuilding()
@@ -24,6 +25,7 @@ public class LandBlock extends GeoBlock {
 		if (construction != null)
 		{
 			construction.demolish();
+			construction = null;
 		}
 	}	
 
