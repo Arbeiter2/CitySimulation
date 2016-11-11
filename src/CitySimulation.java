@@ -1,4 +1,5 @@
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -28,6 +29,11 @@ public class CitySimulation {
 	public void setTaxRate(TaxSource taxClass, double rate) {
 		if (rate > 0.00 && rate < 1.00)
 			this.taxRates.put(taxClass, rate);
+	}
+	
+	public static double sigmoid(double x, double factor)
+	{
+		return Math.exp(factor * x)/(1.0 + Math.exp(factor * x));
 	}
 	
 	
@@ -212,8 +218,10 @@ public class CitySimulation {
 			}
 		}
 
-		// building demolishes itself, and then is removed from register
+		// building demolishes itself
 		b.demolish();
+		
+		// remove from register
 		buildingRegister.remove(b);		
 	}
 
@@ -236,9 +244,44 @@ public class CitySimulation {
 		double bedDiff = (bedSupply - bedDemand)/bedDemand;
 		
 		// health level changes as a sigmoid
-		double hlevel = Math.exp(HEALTH_SIGMOID_FACTOR * (bedDiff + HEALTH_SIGMOID_OFFSET))/(1 + Math.exp(HEALTH_SIGMOID_FACTOR * (bedDiff + HEALTH_SIGMOID_OFFSET)));
+		double hlevel = CitySimulation.sigmoid(HEALTH_SIGMOID_FACTOR, (bedDiff + HEALTH_SIGMOID_OFFSET));
 		
 		return hlevel;
+	}
+	
+	HashSet<LandBlock> getPoliceCover(Class<MunicipalBuilding> buildingClass, 
+			ArrayList<MunicipalBuilding> police, HashMap<Point, LandBlock> builtupLand)
+	{
+		HashSet<LandBlock> covered = new HashSet<LandBlock>();
+		int coverage = buildingClass.getCoverage();
+		LandBlock block;
+		
+		for (MunicipalBuilding p : police)
+		{
+			// NW corner
+			Point position = p.getLocation().getLocation();
+			int startX = (position.x - coverage> 0 ? position.x - coverage: position.x);
+			int startY = (position.y - coverage > 0 ? position.y - coverage: position.y);
+			int endX = (position.x + PoliceStation.WIDTH + coverage < gridWidth ? position.x + PoliceStation.WIDTH + coverage : gridWidth );
+			int endY = (position.y + PoliceStation.HEIGHT + coverage < gridHeight ? position.y + PoliceStation.HEIGHT + coverage : gridHeight );
+			for (int i=startX; i < endX; i++)
+			{
+				for (int j=startY; j < endY; j++)
+				{
+					block = builtupLand.get(new Point(i, j));
+					
+					// block is covered, but not LandBlock
+					if (block == null)
+						continue;
+					
+					block.setHasPolceCover(true);
+					if (block.getConstruction() != null)
+						covered.add(block);
+				}
+			}
+		}
+		
+		return covered;
 	}
 	
 	
@@ -255,9 +298,9 @@ public class CitySimulation {
 	 */
 	public double getCityCrimeLevel(double unprotectedRatio)
 	{
-		double x = Math.exp(CRIME_SIGMOID_FACTOR * (unprotectedRatio + CRIME_SIGMOID_OFFSET));
+		double x = CitySimulation.sigmoid(CRIME_SIGMOID_FACTOR, (unprotectedRatio + CRIME_SIGMOID_OFFSET));
 		
-		return 1.0 + CRIME_SIGMOID_SCALAR * (x/(1.0 + x));
+		return 1.0 + CRIME_SIGMOID_SCALAR * x;
 	}
 	
 	public int getCurrentMonth()

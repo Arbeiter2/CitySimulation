@@ -29,17 +29,42 @@ public class LandBlock extends GeoBlock {
 		}
 	}	
 
-	public Building getConstruction() {
-		return construction;
-	}
-
 	/**
 	 * A block can contain at most one (1) building
 	 */
 	private Building construction;
 
-	//public double getConstructionMultiplier();
+	public Building getConstruction() {
+		return construction;
+	}
 
+	/**
+	 * whether this block is covered by at least one (1) fire station
+	 */
+	boolean hasFireCover = false;
+	
+	public boolean hasFireCover() {
+		return hasFireCover;
+	}
+
+	public void setHasFireCover(boolean hasFireCover) {
+		this.hasFireCover = hasFireCover;
+	}
+	
+	/**
+	 * whether this block is covered by at least one (1) police station
+	 */
+	boolean hasPolceCover = false;
+
+	public boolean hasPolceCover() {
+		return hasPolceCover;
+	}
+
+	public void setHasPolceCover(boolean hasPolceCover) {
+		this.hasPolceCover = hasPolceCover;
+	}
+
+	//public double getConstructionMultiplier();
 	//public double getCrimeLevel();
 	//public double getLandValue();
 	//public double getWellbeingValue();
