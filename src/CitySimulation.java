@@ -2,8 +2,12 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class CitySimulation {
+public class CitySimulation implements GameClock
+{
 	
 	//
 	// Tax &amp; inflation
@@ -61,6 +65,7 @@ public class CitySimulation {
 	
 	// grid of blocks representing map
 	GeoBlock[][] grid;
+	HashSet<LandBlock> buildableBlocks;
 	
 	// all buildings in the game, and their grid location
 	HashMap<Building, Point> buildingRegister;
@@ -79,6 +84,9 @@ public class CitySimulation {
 		// create grid of blocks
 		grid = new GeoBlock[gridWidth][gridHeight];
 		
+		buildableBlocks = new HashSet<LandBlock>();
+
+		
 		// create taxRates, and load with default rates
 		taxRates = new HashMap<TaxSource, Double>();
 		
@@ -90,7 +98,9 @@ public class CitySimulation {
 	}
 	
 	/**
-	 * Place a block into the grid
+	 * Place a block into the grid.
+	 * 
+	 * If block is a LandBlock, add it to the Set of buildables
 	 * 
 	 * @param g non-null GeoBlock
 	 */
@@ -99,7 +109,13 @@ public class CitySimulation {
 		if (g == null) return;
 		
 		Point p = g.getLocation();
+
+		// remove block from buildables just in case
+		buildableBlocks.remove(grid[p.x][p.y]);
+		
 		grid[p.x][p.y] = g;
+		if (g instanceof LandBlock)
+			buildableBlocks.add((LandBlock) g);
 	}
 	
 
@@ -249,32 +265,50 @@ public class CitySimulation {
 		return hlevel;
 	}
 	
-	HashSet<LandBlock> getPoliceCover(Class<MunicipalBuilding> buildingClass, 
-			ArrayList<MunicipalBuilding> police, HashMap<Point, LandBlock> builtupLand)
+	/**
+	 * Create Set of occupied LandBlocks covered by MunicipalBuildings in provided list.
+	 * 
+	 * Uses supplied Map of occupied LandBlocks.
+	 * 
+	 * Updates all 
+	 * 
+	 * @param buildings list of buildings (should all be same class)
+	 * @param builtupLand Map of occupied LandBlocks 
+	 * @return Set of covered LandBlocks
+	 */
+	Set<LandBlock> getMuniBuildingCover(List<MunicipalBuilding> buildings, Map<Point, LandBlock> builtupLand)
 	{
 		HashSet<LandBlock> covered = new HashSet<LandBlock>();
-		int coverage = buildingClass.getCoverage();
-		LandBlock block;
 		
-		for (MunicipalBuilding p : police)
+		int coverage, height, width;
+		LandBlock block;
+		Point position, testPos = new Point(0,0);
+		
+		for (MunicipalBuilding p : buildings)
 		{
 			// NW corner
-			Point position = p.getLocation().getLocation();
+			position = p.getLocation().getLocation();
+			coverage = p.getCoverage();
+			height = p.getHeight();
+			width = p.getWidth()
+			;		
 			int startX = (position.x - coverage> 0 ? position.x - coverage: position.x);
 			int startY = (position.y - coverage > 0 ? position.y - coverage: position.y);
-			int endX = (position.x + PoliceStation.WIDTH + coverage < gridWidth ? position.x + PoliceStation.WIDTH + coverage : gridWidth );
-			int endY = (position.y + PoliceStation.HEIGHT + coverage < gridHeight ? position.y + PoliceStation.HEIGHT + coverage : gridHeight );
+			int endX = (position.x + width + coverage < gridWidth ? position.x + width + coverage : gridWidth );
+			int endY = (position.y + height + coverage < gridHeight ? position.y + height+ coverage : gridHeight );
 			for (int i=startX; i < endX; i++)
 			{
 				for (int j=startY; j < endY; j++)
 				{
-					block = builtupLand.get(new Point(i, j));
+					testPos.x = i;
+					testPos.y = j;
+					block = builtupLand.get(testPos);
 					
 					// block is covered, but not LandBlock
 					if (block == null)
 						continue;
 					
-					block.setHasPolceCover(true);
+					// final check that block is occupied
 					if (block.getConstruction() != null)
 						covered.add(block);
 				}
@@ -284,6 +318,45 @@ public class CitySimulation {
 		return covered;
 	}
 	
+	/**
+	 * Turn off fire and police station cover for all blocks in set
+	 * 
+	 * @param land Set of LandBlocks
+	 */
+	void resetMuniCover(Set<LandBlock> land)
+	{
+		for (LandBlock block : land)
+		{
+			block.setFireCover(false);
+			block.setPoliceCover(false);
+		}
+	}
+	
+	/**
+	 * Set blocks to fire covered
+	 * 
+	 * @param covered Set of LandBlocks
+	 */
+	void setFireCover(Set<LandBlock> covered)
+	{
+		for (LandBlock block : covered)
+		{
+			block.setFireCover(true);
+		}
+	}
+	
+	/**
+	 * Set blocks to police covered
+	 * 
+	 * @param covered Set of LandBlocks
+	 */	
+	void setPoliceCover(Set<LandBlock> covered)
+	{
+		for (LandBlock block : covered)
+		{
+			block.setPoliceCover(true);
+		}
+	}	
 	
 	/**
 	 * Calculate crime rate multiplier, with range (1, CRIME_SIGMOID_FACTOR).
@@ -303,9 +376,32 @@ public class CitySimulation {
 		return 1.0 + CRIME_SIGMOID_SCALAR * x;
 	}
 	
-	public int getCurrentMonth()
+	public void tick(int month)
 	{
-		return 1;
+		ArrayList<MunicipalBuilding> policeStations = new ArrayList<MunicipalBuilding>();
+		ArrayList<MunicipalBuilding> fireStations = new ArrayList<MunicipalBuilding>();
+		ArrayList<MunicipalBuilding> hospitals = new ArrayList<MunicipalBuilding>();
+
+		ArrayList<OccupiedBuilding> revenueBldgs = new ArrayList<OccupiedBuilding>();
+		
+		
+		// get police stations, fire stations, hospitals
+		// and taxable buildings from the register
+		for (Building bldg : this.buildingRegister.keySet())
+		{
+			switch (bldg.getClass().getName())
+			{
+			case "PoliceStation": policeStations.add((MunicipalBuilding) bldg); break;
+			case "FireStation": fireStations.add((MunicipalBuilding) bldg); break;
+			case "Hospital": hospitals.add((MunicipalBuilding) bldg); break;
+			
+			default:
+				revenueBldgs.add((OccupiedBuilding) bldg);
+				break;
+				
+			};
+		}
+		
 	}
 	
 }

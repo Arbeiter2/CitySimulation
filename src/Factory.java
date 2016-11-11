@@ -4,7 +4,7 @@
  * @author dwgreenidge
  *
  */
-public class Factory extends OccupiedBuilding {
+public class Factory extends IndustrialBuilding {
 	
 	public static final int HEIGHT = 10;
 	public static final int WIDTH = 10;
@@ -12,10 +12,10 @@ public class Factory extends OccupiedBuilding {
 	public static final int CONSTRUCTION_COST = 5000000;
 	
 	public Factory(int constrMonth) {
-		super(constrMonth, CONSTRUCTION_COST, CitySimulation.TaxSource.INDUSTRIAL);
-		height = House.HEIGHT;
-		width = House.WIDTH;
-		capacity = CAPACITY;
+		super(constrMonth, Factory.CONSTRUCTION_COST);
+		height = Factory.HEIGHT;
+		width = Factory.WIDTH;
+		capacity = Factory.CAPACITY;
 	}
 
 }

@@ -47,21 +47,35 @@ public class LandBlock extends GeoBlock {
 		return hasFireCover;
 	}
 
-	public void setHasFireCover(boolean hasFireCover) {
+	/**
+	 * Set fire station coverage status of LandBlock and any construction on it
+	 * 
+	 * @param hasFireCover true for covered, false otherwise
+	 */
+	public void setFireCover(boolean hasFireCover) {
 		this.hasFireCover = hasFireCover;
+		if (construction != null)
+			construction.setFireCover(hasPoliceCover);
 	}
 	
 	/**
 	 * whether this block is covered by at least one (1) police station
 	 */
-	boolean hasPolceCover = false;
+	boolean hasPoliceCover = false;
 
-	public boolean hasPolceCover() {
-		return hasPolceCover;
+	public boolean getPoliceCover() {
+		return hasPoliceCover;
 	}
 
-	public void setHasPolceCover(boolean hasPolceCover) {
-		this.hasPolceCover = hasPolceCover;
+	/**
+	 * Set police station coverage status of LandBlock and any construction on it
+	 * 
+	 * @param hasPoliceCover true for covered, false otherwise
+	 */
+	public void setPoliceCover(boolean hasPoliceCover) {
+		this.hasPoliceCover = hasPoliceCover;
+		if (construction != null)
+			construction.setPoliceCover(hasPoliceCover);
 	}
 
 	//public double getConstructionMultiplier();

@@ -16,9 +16,9 @@ abstract public class MunicipalBuilding extends Building {
 	
 	// number of blocks where in each direction over which
 	// building has effect or coverage
-	private static int coverage;
+	private int coverage;
 
-	public static int getCoverage() {
+	public int getCoverage() {
 		return coverage;
 	}
 

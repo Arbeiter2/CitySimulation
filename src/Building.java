@@ -67,6 +67,32 @@ abstract public class Building {
 		return constructionCost;
 	}
 
+	/**
+	 * whether this block is covered by at least one (1) fire station
+	 */
+	boolean hasFireCover = false;
+	
+	public boolean hasFireCover() {
+		return hasFireCover;
+	}
+
+	public void setFireCover(boolean hasFireCover) {
+		this.hasFireCover = hasFireCover;
+	}
+	
+	/**
+	 * whether this block is covered by at least one (1) police station
+	 */
+	boolean hasPoliceCover = false;
+
+	public boolean getPoliceCover() {
+		return hasPoliceCover;
+	}
+
+	public void setPoliceCover(boolean hasPolceCover) {
+		this.hasPoliceCover = hasPolceCover;
+	}
+	
 	
 	/**
 	 * For tax revenue buildings like homes or offices, maximum number
