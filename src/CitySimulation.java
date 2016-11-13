@@ -23,6 +23,11 @@ public class CitySimulation implements GameClock
 	// tax revenue types
 	public enum TaxSource { RESIDENTIAL, COMMERCIAL, INDUSTRIAL };
 	
+	//  A family has two working adults and two children, and is the 
+	// standard unit for a residence.
+	public static final int FAMILY_SIZE = 4;
+	public static final int WORKING_FAMILY_MEMBERS = 2;
+	
 	// rates for all types of occupied buildings
 	HashMap<TaxSource, Double> taxRates;
 
@@ -69,6 +74,16 @@ public class CitySimulation implements GameClock
 	
 	// all buildings in the game, and their grid location
 	HashMap<Building, Point> buildingRegister;
+
+	// individual types of buildings
+	ArrayList<MunicipalBuilding> policeStations = new ArrayList<MunicipalBuilding>();
+	ArrayList<MunicipalBuilding> fireStations = new ArrayList<MunicipalBuilding>();
+	ArrayList<MunicipalBuilding> hospitals = new ArrayList<MunicipalBuilding>();
+
+	ArrayList<ResidentialBuilding> residentBldgs = new ArrayList<ResidentialBuilding>();
+	ArrayList<IndustrialBuilding> industryBldgs = new ArrayList<IndustrialBuilding>();
+	ArrayList<CommercialBuilding> commerceBldgs = new ArrayList<CommercialBuilding>();
+	
 	
 	// width of grid
 	int gridWidth;
@@ -162,6 +177,25 @@ public class CitySimulation implements GameClock
 				((LandBlock) grid[x][y]).addBuilding(b);
 			}
 		}
+		
+		// add to specific register
+		String bldgClassName = b.getClass().getName();
+		switch (bldgClassName)
+		{
+		case "PoliceStation": policeStations.add((MunicipalBuilding) b); break;
+		case "FireStation": fireStations.add((MunicipalBuilding) b); break;
+		case "Hospital": hospitals.add((MunicipalBuilding) b); break;
+		
+		default:
+			switch (b.getClass().getSuperclass().getName())
+			{
+			case "ResidentialBuilding": residentBldgs.add((ResidentialBuilding) b); break;
+			case "IndustrialBuilding": industryBldgs.add((IndustrialBuilding) b); break;
+			case "CommercialBuilding": commerceBldgs.add((CommercialBuilding) b); break;
+			default: System.out.println("Unknown building type ["+bldgClassName+"]");
+			};
+			break;
+		};		
 		return true;
 	}
 
@@ -237,8 +271,27 @@ public class CitySimulation implements GameClock
 		// building demolishes itself
 		b.demolish();
 		
-		// remove from register
-		buildingRegister.remove(b);		
+		// remove from global register
+		buildingRegister.remove(b);
+		
+		// remove to specific register
+		String bldgClassName = b.getClass().getName();
+		switch (bldgClassName)
+		{
+		case "PoliceStation": policeStations.remove((MunicipalBuilding) b); break;
+		case "FireStation": fireStations.remove((MunicipalBuilding) b); break;
+		case "Hospital": hospitals.remove((MunicipalBuilding) b); break;
+		
+		default:
+			switch (b.getClass().getSuperclass().getName())
+			{
+			case "ResidentialBuilding": residentBldgs.remove((ResidentialBuilding) b); break;
+			case "IndustrialBuilding": industryBldgs.remove((IndustrialBuilding) b); break;
+			case "CommercialBuilding": commerceBldgs.remove((CommercialBuilding) b); break;
+			default: System.out.println("Unknown building type ["+bldgClassName+"]");
+			};
+			break;
+		};				
 	}
 
 	/**
@@ -376,32 +429,66 @@ public class CitySimulation implements GameClock
 		return 1.0 + CRIME_SIGMOID_SCALAR * x;
 	}
 	
+	
+	/**
+	 * Create Set of LandBlocks with construction
+	 * 
+	 * @return
+	 */
+	Map<Point, LandBlock> getBuiltupLand()
+	{
+		Map<Point, LandBlock> builtupLand = new HashMap<Point, LandBlock>();
+		
+		for (LandBlock block : buildableBlocks)
+		{
+			if (block.getConstruction() != null)
+				builtupLand.put(block.getLocation(), block);
+		}
+		return builtupLand;
+	}
+	
+	/**
+	 * Calculate total number of residents
+	 * 
+	 * Iterate through all residential buildings
+	 * 
+	 * @return sum of all occupants
+	 */
+	public int getNumberOfHouseholds()
+	{
+		int totalPop = 0;
+		
+		for (Building b : residentBldgs)
+		{
+			totalPop += ((ResidentialBuilding) b).getNumberOfOccupants();
+		}
+		return totalPop;
+	}
+	
 	public void tick(int month)
 	{
-		ArrayList<MunicipalBuilding> policeStations = new ArrayList<MunicipalBuilding>();
-		ArrayList<MunicipalBuilding> fireStations = new ArrayList<MunicipalBuilding>();
-		ArrayList<MunicipalBuilding> hospitals = new ArrayList<MunicipalBuilding>();
+		// for finding police/fire coverage
+		Map<Point, LandBlock> builtupLand = getBuiltupLand();
+		double totalBlockCount = (double) builtupLand.size();
+		Set<LandBlock> covered;
+		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;
+		
+		int numberOfHouseholds = getNumberOfHouseholds();
+		int totalPopulation = numberOfHouseholds * FAMILY_SIZE;
+		int workingPopulation = numberOfHouseholds * WORKING_FAMILY_MEMBERS;
+		
+		// find police cover
+		covered = getMuniBuildingCover(policeStations, builtupLand);
+		unprotectedRatio = covered.size()/totalBlockCount; 
+		cityCrimeLevel = getCityCrimeLevel(unprotectedRatio);
 
-		ArrayList<OccupiedBuilding> revenueBldgs = new ArrayList<OccupiedBuilding>();
-		
-		
-		// get police stations, fire stations, hospitals
-		// and taxable buildings from the register
-		for (Building bldg : this.buildingRegister.keySet())
-		{
-			switch (bldg.getClass().getName())
-			{
-			case "PoliceStation": policeStations.add((MunicipalBuilding) bldg); break;
-			case "FireStation": fireStations.add((MunicipalBuilding) bldg); break;
-			case "Hospital": hospitals.add((MunicipalBuilding) bldg); break;
-			
-			default:
-				revenueBldgs.add((OccupiedBuilding) bldg);
-				break;
-				
-			};
-		}
-		
+		// find fire cover
+		covered = getMuniBuildingCover(this.fireStations, builtupLand);
+		unprotectedRatio = covered.size()/totalBlockCount; 
+		cityFireCover = getCityCrimeLevel(unprotectedRatio);
+
+		// find health level
+		cityHealthLevel = this.getCityHealthLevel(this.hospitals.size(), totalPopulation);
 	}
 	
 }

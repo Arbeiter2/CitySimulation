@@ -89,8 +89,8 @@ abstract public class Building {
 		return hasPoliceCover;
 	}
 
-	public void setPoliceCover(boolean hasPolceCover) {
-		this.hasPoliceCover = hasPolceCover;
+	public void setPoliceCover(boolean hasPoliceCover) {
+		this.hasPoliceCover = hasPoliceCover;
 	}
 	
 	
