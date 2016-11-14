@@ -80,9 +80,9 @@ public class CitySimulation implements GameClock
 	ArrayList<MunicipalBuilding> fireStations = new ArrayList<MunicipalBuilding>();
 	ArrayList<MunicipalBuilding> hospitals = new ArrayList<MunicipalBuilding>();
 
-	ArrayList<ResidentialBuilding> residentBldgs = new ArrayList<ResidentialBuilding>();
-	ArrayList<IndustrialBuilding> industryBldgs = new ArrayList<IndustrialBuilding>();
-	ArrayList<CommercialBuilding> commerceBldgs = new ArrayList<CommercialBuilding>();
+	ArrayList<OccupiedBuilding> residentBldgs = new ArrayList<OccupiedBuilding>();
+	ArrayList<OccupiedBuilding> industryBldgs = new ArrayList<OccupiedBuilding>();
+	ArrayList<OccupiedBuilding> commerceBldgs = new ArrayList<OccupiedBuilding>();
 	
 	
 	// width of grid
@@ -447,22 +447,26 @@ public class CitySimulation implements GameClock
 		return builtupLand;
 	}
 	
-	/**
-	 * Calculate total number of residents
-	 * 
-	 * Iterate through all residential buildings
-	 * 
-	 * @return sum of all occupants
-	 */
-	public int getNumberOfHouseholds()
+
+	
+	public int getTotalCapacity(List<OccupiedBuilding> buildings)
 	{
-		int totalPop = 0;
-		
-		for (Building b : residentBldgs)
+		int retVal = 0;
+		for (OccupiedBuilding c : buildings)
 		{
-			totalPop += ((ResidentialBuilding) b).getNumberOfOccupants();
+			retVal += c.getCapacity();
 		}
-		return totalPop;
+		return retVal;
+	}
+
+	public int getTotalOccupants(List<OccupiedBuilding> buildings)
+	{
+		int retVal = 0;
+		for (OccupiedBuilding c : buildings)
+		{
+			retVal += c.getNumberOfOccupants();
+		}
+		return retVal;
 	}
 	
 	public void tick(int month)
@@ -473,9 +477,18 @@ public class CitySimulation implements GameClock
 		Set<LandBlock> covered;
 		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;
 		
-		int numberOfHouseholds = getNumberOfHouseholds();
+		int numberOfHouseholds = getTotalOccupants(residentBldgs);
 		int totalPopulation = numberOfHouseholds * FAMILY_SIZE;
+		int residentialCapacity = getTotalCapacity(residentBldgs);
+		int residentialVacancies = residentialCapacity - numberOfHouseholds;
+		
 		int workingPopulation = numberOfHouseholds * WORKING_FAMILY_MEMBERS;
+		int commerceCapacity = getTotalCapacity(commerceBldgs);
+		int industrialCapacity = getTotalCapacity(industryBldgs);
+		
+		int commerceWorkers = getTotalOccupants(commerceBldgs);
+		int industryWorkers = getTotalOccupants(industryBldgs);
+		int workVacancies = (commerceCapacity + industrialCapacity) - workingPopulation;
 		
 		// find police cover
 		covered = getMuniBuildingCover(policeStations, builtupLand);
@@ -483,12 +496,17 @@ public class CitySimulation implements GameClock
 		cityCrimeLevel = getCityCrimeLevel(unprotectedRatio);
 
 		// find fire cover
-		covered = getMuniBuildingCover(this.fireStations, builtupLand);
-		unprotectedRatio = covered.size()/totalBlockCount; 
-		cityFireCover = getCityCrimeLevel(unprotectedRatio);
+		covered = getMuniBuildingCover(fireStations, builtupLand);
+		cityFireCover = (totalBlockCount - covered.size())/totalBlockCount; 
 
 		// find health level
-		cityHealthLevel = this.getCityHealthLevel(this.hospitals.size(), totalPopulation);
+		cityHealthLevel = getCityHealthLevel(hospitals.size(), totalPopulation);
+		
+
+
+
+		
+		
 	}
 	
 }
