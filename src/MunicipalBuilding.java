@@ -7,7 +7,7 @@
 abstract public class MunicipalBuilding extends Building {
 	
 	// monthly running cost
-	private int monthlyCost; 
+	protected int monthlyCost; 
 	public int getMonthlyCost()
 	{
 		return monthlyCost;
@@ -16,7 +16,7 @@ abstract public class MunicipalBuilding extends Building {
 	
 	// number of blocks where in each direction over which
 	// building has effect or coverage
-	private int coverage;
+	protected int coverage;
 
 	public int getCoverage() {
 		return coverage;

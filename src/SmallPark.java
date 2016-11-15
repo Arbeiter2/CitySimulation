@@ -1,5 +1,5 @@
 
-public class SmallPark extends MunicipalBuilding {
+public class SmallPark extends RecreationBuilding {
 
 	public static final int HEIGHT = 1;
 	public static final int WIDTH = 1;

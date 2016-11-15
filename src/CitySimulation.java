@@ -338,9 +338,9 @@ public class CitySimulation implements GameClock
 	 * @param builtupLand Map of occupied LandBlocks 
 	 * @return Set of covered LandBlocks
 	 */
-	Set<LandBlock> getMuniBuildingCover(List<MunicipalBuilding> buildings, Map<Point, LandBlock> builtupLand)
+	Map<LandBlock, Integer> getMuniBuildingCover(List<MunicipalBuilding> buildings, Map<Point, LandBlock> builtupLand)
 	{
-		HashSet<LandBlock> covered = new HashSet<LandBlock>();
+		HashMap<LandBlock, Integer>covered = new HashMap<LandBlock, Integer>();
 		
 		int coverage, height, width;
 		LandBlock block;
@@ -372,7 +372,12 @@ public class CitySimulation implements GameClock
 					
 					// final check that block is occupied
 					if (block.getConstruction() != null)
-						covered.add(block);
+					{
+						Integer count = covered.get(p);
+						if (p == null)
+							count = 0;
+						covered.put(block, count++);
+					}
 				}
 			}
 		}
@@ -483,7 +488,7 @@ public class CitySimulation implements GameClock
 		// for finding police/fire coverage
 		Map<Point, LandBlock> builtupLand = getBuiltupLand();
 		double totalBlockCount = (double) builtupLand.size();
-		Set<LandBlock> covered;
+		Map<LandBlock, Integer> covered;
 		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;
 		
 		int numberOfHouseholds = getTotalOccupants(residentBldgs);

@@ -1,5 +1,8 @@
-
-public class LargePark extends MunicipalBuilding {
+/**
+ * @author Delano Greenidge
+ *
+ */
+public class LargePark extends RecreationBuilding {
 
 	public static final int HEIGHT = 2;
 	public static final int WIDTH = 2;
