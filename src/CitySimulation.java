@@ -56,17 +56,27 @@ public class CitySimulation implements GameClock
 	// controls slope of health level curve
 	public static final double HEALTH_SIGMOID_FACTOR = -8d;
 	public static final double HEALTH_SIGMOID_OFFSET = 0.25;
+	public static final double MINIMUM_BED_DEMAND = 100d;
 
+	// ratio of families scared off by low health
+	public static final double HEALTH_ATTRITION_RATE = 0.01;
+	
 	// Crime stats
 	//
 	// number of recorded crimes per month per capita;
 	// equal to Belgium's 0.1 per capita per year
 	public static final double MONTHLY_CRIMES_PER_CAPITA = 0.008;
+
+	// ratio of families scared off by crime
+	public static final double CRIME_ATTRITION_RATE = 0.01;
 	
-	// controls slope of health level curve
+	// controls slope of crimelevel curve
 	public static final double CRIME_SIGMOID_SCALAR = 8d;
 	public static final double CRIME_SIGMOID_FACTOR = 8d;
-	public static final double CRIME_SIGMOID_OFFSET = -0.75;	
+	public static final double CRIME_SIGMOID_OFFSET = -0.75;
+	
+	// rate of monthly growth corresponding to 10% per annum
+	public static final double NATURAL_MONTHLY_GROWTH = 1.008;
 	
 	// grid of blocks representing map
 	GeoBlock[][] grid;
@@ -307,10 +317,9 @@ public class CitySimulation implements GameClock
 		double bedDemand = population * HOSPITAL_BED_RATIO;
 		
 		// small populations can look after themselves
-		if (bedDemand < 1d)
-			return 0d;
-		
-		double bedDiff = (bedSupply - bedDemand)/bedDemand;
+		double bedDiff = 0d;
+		if (bedDemand >= CitySimulation.MINIMUM_BED_DEMAND)
+			bedDiff = (bedSupply - bedDemand)/bedDemand;
 		
 		// health level changes as a sigmoid
 		double hlevel = CitySimulation.sigmoid(HEALTH_SIGMOID_FACTOR, (bedDiff + HEALTH_SIGMOID_OFFSET));
@@ -412,7 +421,7 @@ public class CitySimulation implements GameClock
 	}	
 	
 	/**
-	 * Calculate crime rate multiplier, with range (1, CRIME_SIGMOID_FACTOR).
+	 * Calculate crime rate multiplier, with range (0, CRIME_SIGMOID_FACTOR).
 	 * 
 	 * This represents how much higher crime is than the expected average.
 	 * 
@@ -502,8 +511,11 @@ public class CitySimulation implements GameClock
 		// find health level
 		cityHealthLevel = getCityHealthLevel(hospitals.size(), totalPopulation);
 		
-
-
+		double change = workVacancies;
+		change -= cityCrimeLevel * CRIME_ATTRITION_RATE * numberOfHouseholds;
+		change += cityHealthLevel * HEALTH_ATTRITION_RATE * numberOfHouseholds;
+		change -= cityFireCover * CRIME_ATTRITION_RATE * numberOfHouseholds;
+		change += NATURAL_MONTHLY_GROWTH * numberOfHouseholds;
 
 		
 		
