@@ -92,6 +92,7 @@ public class CitySimulation implements GameClock
 	GeoBlock[][] grid;
 	HashSet<LandBlock> buildableBlocks;
 	
+	
 	// all buildings in the game, and their grid location
 	HashMap<Building, Point> buildingRegister;
 
@@ -561,14 +562,20 @@ public class CitySimulation implements GameClock
 	
 	
 	/**
-	 * Change the number of occupants in the supplied buildings, using the
-	 * wellBeingMap to determine where
-	 * @param delta
-	 * @param vacancies
-	 * @param totalCapacity
-	 * @param wellBeingMap
+	 * Change the number of occupants in the supplied buildings.
+	 * 
+	 * Buildings with higher well-being scores are more likely to get new occupants,
+	 * and lower-scoring buildings are more likely to lose occupants first.
+	 * 
+	 * @param delta number of occupants to add (can be negative)
+	 * @param vacancies number of empty spaces available
+	 * @param totalCapacity total number of spaces
+	 * @param buildings OccupiedBuildings to change
+	 * @param wellBeingMap aggregate well-being value for each building
 	 */
-	void applyOccupancyChange(int delta, int vacancies, int totalCapacity, Map<Building, Double> wellBeingMap)
+	void applyOccupancyChange(int delta, int vacancies, int totalCapacity, 
+			List<OccupiedBuilding> buildings,
+			Map<Building, Double> wellBeingMap)
 	{
 		List<OccupiedBuilding> availableBldgs = new ArrayList<OccupiedBuilding>();
 		double wellBeing, totalWb = 0d;
@@ -577,7 +584,7 @@ public class CitySimulation implements GameClock
 		if (delta == 0 || delta > vacancies)
 			return;
 		
-		for (OccupiedBuilding bldg : residentBldgs)
+		for (OccupiedBuilding bldg : buildings)
 		{
 			// ignore buildings that are full, or empty
 			if (delta > 0 && bldg.getNumberOfOccupants() == bldg.getCapacity())
@@ -587,7 +594,7 @@ public class CitySimulation implements GameClock
 			
 			availableBldgs.add(bldg);
 			wellBeing = wellBeingMap.get(bldg);
-			totalWb += wellBeing;
+			totalWb += (delta > 0 ? wellBeing : (wellBeing == 0 ? 999 : 1.0/wellBeing));
 		}
 		
 		
@@ -652,7 +659,6 @@ public class CitySimulation implements GameClock
 	public void tick(int month)
 	{
 		// for finding police/fire coverage
-		Map<Point, LandBlock> builtupLand = getBuiltupLand();
 		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;
 		double totalBlockCount = (double) builtupLand.size();
 		
@@ -691,12 +697,13 @@ public class CitySimulation implements GameClock
 		change += workVacancies * VACANCY_FILL_RATE;
 		
 		int populationDelta = (int) change;
-		applyOccupancyChange(populationDelta, residentialVacancies, residentialCapacity, wellBeingMap);
+		applyOccupancyChange(populationDelta, residentialVacancies, residentialCapacity, residentBldgs, wellBeingMap);
 		
 		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
-		applyOccupancyChange(workforceDelta, workVacancies, commerceCapacity, wellBeingMap);
-	
+		applyOccupancyChange(workforceDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
+		applyOccupancyChange(workforceDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
 		
+		resetMuniCover(new HashSet<LandBlock>(builtupLand.values()));
 	}
 	
 }
