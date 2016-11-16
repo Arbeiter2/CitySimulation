@@ -19,6 +19,8 @@ public class CitySimulation implements GameClock
 
 	// determines rise of building costs and running costs
 	public static final double MONTHLY_INFLATION_RATE = 0.001652;
+	
+	// 
 
 	// tax revenue types
 	public enum TaxSource { RESIDENTIAL, COMMERCIAL, INDUSTRIAL };
@@ -45,6 +47,8 @@ public class CitySimulation implements GameClock
 		return Math.exp(factor * x)/(1.0 + Math.exp(factor * x));
 	}
 	
+	// rate at which jobs are filled
+	public static final double VACANCY_FILL_RATE = 0.01;
 	
 	//
 	// Health stats
@@ -69,6 +73,9 @@ public class CitySimulation implements GameClock
 
 	// ratio of families scared off by crime
 	public static final double CRIME_ATTRITION_RATE = 0.01;
+
+	// ratio of families scared off by no fire cover
+	public static final double FIRE_ATTRITION_RATE = 0.005;
 	
 	// controls slope of crimelevel curve
 	public static final double CRIME_SIGMOID_SCALAR = 8d;
@@ -77,6 +84,9 @@ public class CitySimulation implements GameClock
 	
 	// rate of monthly growth corresponding to 10% per annum
 	public static final double NATURAL_MONTHLY_GROWTH = 1.008;
+	
+	// total population
+	int totalPopulation = 0;
 	
 	// grid of blocks representing map
 	GeoBlock[][] grid;
@@ -89,10 +99,18 @@ public class CitySimulation implements GameClock
 	ArrayList<MunicipalBuilding> policeStations = new ArrayList<MunicipalBuilding>();
 	ArrayList<MunicipalBuilding> fireStations = new ArrayList<MunicipalBuilding>();
 	ArrayList<MunicipalBuilding> hospitals = new ArrayList<MunicipalBuilding>();
+	ArrayList<MunicipalBuilding> recreationBldgs = new ArrayList<MunicipalBuilding>();
 
 	ArrayList<OccupiedBuilding> residentBldgs = new ArrayList<OccupiedBuilding>();
 	ArrayList<OccupiedBuilding> industryBldgs = new ArrayList<OccupiedBuilding>();
 	ArrayList<OccupiedBuilding> commerceBldgs = new ArrayList<OccupiedBuilding>();
+	
+	//
+	// record of LandBlocks with construction 
+	Map<Point, LandBlock> builtupLand;
+	
+	// record of LandBlocks covered by various municipal buildings
+	Map<LandBlock, Integer> fireCover, policeCover, recreationCover;
 	
 	
 	// width of grid
@@ -100,11 +118,15 @@ public class CitySimulation implements GameClock
 	
 	// height of grid
 	int gridHeight;
+	
+	// available cash for construction, tax etc.
+	int bankBalance;
 
-	CitySimulation(int width, int height)
+	CitySimulation(int width, int height, int startBudget)
 	{
 		gridWidth = width;
 		gridHeight = height;
+		bankBalance = startBudget;
 		
 		// create grid of blocks
 		grid = new GeoBlock[gridWidth][gridHeight];
@@ -188,12 +210,21 @@ public class CitySimulation implements GameClock
 			}
 		}
 		
+		// update view of LandBlocks with construction
+		builtupLand = getBuiltupLand();
+		
 		// add to specific register
 		String bldgClassName = b.getClass().getName();
 		switch (bldgClassName)
 		{
-		case "PoliceStation": policeStations.add((MunicipalBuilding) b); break;
-		case "FireStation": fireStations.add((MunicipalBuilding) b); break;
+		case "PoliceStation": 
+			policeStations.add((MunicipalBuilding) b);
+			policeCover = getMuniBuildingCover(policeStations, builtupLand);
+			break;
+		case "FireStation": 
+			fireStations.add((MunicipalBuilding) b); 
+			fireCover = getMuniBuildingCover(fireStations, builtupLand);
+			break;
 		case "Hospital": hospitals.add((MunicipalBuilding) b); break;
 		
 		default:
@@ -202,6 +233,11 @@ public class CitySimulation implements GameClock
 			case "ResidentialBuilding": residentBldgs.add((ResidentialBuilding) b); break;
 			case "IndustrialBuilding": industryBldgs.add((IndustrialBuilding) b); break;
 			case "CommercialBuilding": commerceBldgs.add((CommercialBuilding) b); break;
+			case "RecreationBuilding": 
+				recreationBldgs.add((MunicipalBuilding) b); 
+				recreationCover = getMuniBuildingCover(recreationBldgs, builtupLand);
+				break;
+			
 			default: System.out.println("Unknown building type ["+bldgClassName+"]");
 			};
 			break;
@@ -298,6 +334,8 @@ public class CitySimulation implements GameClock
 			case "ResidentialBuilding": residentBldgs.remove((ResidentialBuilding) b); break;
 			case "IndustrialBuilding": industryBldgs.remove((IndustrialBuilding) b); break;
 			case "CommercialBuilding": commerceBldgs.remove((CommercialBuilding) b); break;
+			case "RecreationBuilding": recreationBldgs.remove((MunicipalBuilding) b); break;
+
 			default: System.out.println("Unknown building type ["+bldgClassName+"]");
 			};
 			break;
@@ -305,7 +343,7 @@ public class CitySimulation implements GameClock
 	}
 
 	/**
-	 * Calculate health level of city, with range (0, 1)
+	 * Calculate health level of city, with range (-1, 1)
 	 * 
 	 * @param numberOfHospitals
 	 * @param population
@@ -483,16 +521,143 @@ public class CitySimulation implements GameClock
 		return retVal;
 	}
 	
+	/**
+	 * Create map of buildings using recreation/police/fire figures
+	 * 
+	 * Value stored is number of recreation facilities covering building 
+	 * 
+	 * @param recreationMap
+	 * @return
+	 */
+	public Map<Building, Double> getWellBeing(Map<LandBlock, Integer> recreationMap)
+	{
+		Map<Building, Double> wellBeingMap = new HashMap<Building, Double>();
+		
+		Building b;
+		Double count;
+		for (Map.Entry<LandBlock, Integer> entry : recreationMap.entrySet())
+		{
+			b = entry.getKey().getConstruction();
+			count = wellBeingMap.get(b);
+			wellBeingMap.put(b, Math.max(count, entry.getValue()));
+		}
+		
+		// now adjust for missing fire/police cover
+		LandBlock block;
+		for (Map.Entry<Building, Double> entry : wellBeingMap.entrySet())
+		{
+			b = entry.getKey();
+			count= wellBeingMap.get(b);
+			block = b.getLocation();
+			if (!block.getFireCover())
+				wellBeingMap.put(b, count * 0.5);
+			if (!block.getPoliceCover())
+				wellBeingMap.put(b, count * 0.5);
+		}
+		
+		return wellBeingMap;
+	}
+	
+	
+	
+	/**
+	 * Change the number of occupants in the supplied buildings, using the
+	 * wellBeingMap to determine where
+	 * @param delta
+	 * @param vacancies
+	 * @param totalCapacity
+	 * @param wellBeingMap
+	 */
+	void applyOccupancyChange(int delta, int vacancies, int totalCapacity, Map<Building, Double> wellBeingMap)
+	{
+		List<OccupiedBuilding> availableBldgs = new ArrayList<OccupiedBuilding>();
+		double wellBeing, totalWb = 0d;
+		
+		// do nothing if no change required, or no residential space available
+		if (delta == 0 || delta > vacancies)
+			return;
+		
+		for (OccupiedBuilding bldg : residentBldgs)
+		{
+			// ignore buildings that are full, or empty
+			if (delta > 0 && bldg.getNumberOfOccupants() == bldg.getCapacity())
+				continue;
+			if (delta < 0 && bldg.getNumberOfOccupants() == 0)
+				continue;
+			
+			availableBldgs.add(bldg);
+			wellBeing = wellBeingMap.get(bldg);
+			totalWb += wellBeing;
+		}
+		
+		
+		// upper and lower bounds of ranges
+		double lBound[] = new double[availableBldgs.size()];
+		double uBound[] = new double[availableBldgs.size()];
+		double last = 0d;
+		
+		int i = 0;
+		for (OccupiedBuilding bldg : availableBldgs)
+		{
+			lBound[i] = last;
+			uBound[i] = last + wellBeingMap.get(bldg)/totalWb;
+			last = uBound[i++]; 
+		}
+		
+		int incr = (delta > 0 ? 1 : -1);
+		
+		double rnd;
+		boolean successful;
+		while (delta != 0)
+		{
+			rnd = Math.random();
+			i=0;
+			successful = false;
+			for (OccupiedBuilding bldg : availableBldgs)
+			{
+				// if this building is chosen and can add/remove occupants, make it happen
+				if (rnd >= lBound[i] && rnd < uBound[i])
+				{
+					if (delta > 0 && bldg.getNumberOfOccupants() < bldg.getCapacity() || 
+						delta < 0 && bldg.getNumberOfOccupants() > 0)
+					{
+						bldg.addOccupants(incr);
+						vacancies = vacancies - incr;
+						delta = delta - incr;
+
+						successful = true;
+					}
+					break;
+				}
+				else if (uBound[i] < rnd)
+				{
+					i++;
+				}
+				else
+				{
+					break;
+				}
+			}
+			
+			// if occupant change was unsuccessful, check whether it is 
+			// even possible anymore
+			if (!successful)
+			{
+				if (incr < 0 && vacancies == totalCapacity || incr > 0 && vacancies == 0)
+					break;
+			}
+		}
+	}
+	
 	public void tick(int month)
 	{
 		// for finding police/fire coverage
 		Map<Point, LandBlock> builtupLand = getBuiltupLand();
-		double totalBlockCount = (double) builtupLand.size();
-		Map<LandBlock, Integer> covered;
 		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;
+		double totalBlockCount = (double) builtupLand.size();
 		
 		int numberOfHouseholds = getTotalOccupants(residentBldgs);
-		int totalPopulation = numberOfHouseholds * FAMILY_SIZE;
+		totalPopulation = numberOfHouseholds * FAMILY_SIZE;
 		int residentialCapacity = getTotalCapacity(residentBldgs);
 		int residentialVacancies = residentialCapacity - numberOfHouseholds;
 		
@@ -505,24 +670,32 @@ public class CitySimulation implements GameClock
 		int workVacancies = (commerceCapacity + industrialCapacity) - workingPopulation;
 		
 		// find police cover
-		covered = getMuniBuildingCover(policeStations, builtupLand);
-		unprotectedRatio = covered.size()/totalBlockCount; 
+		unprotectedRatio = (totalBlockCount - policeCover.size())/totalBlockCount; 
 		cityCrimeLevel = getCityCrimeLevel(unprotectedRatio);
 
 		// find fire cover
-		covered = getMuniBuildingCover(fireStations, builtupLand);
-		cityFireCover = (totalBlockCount - covered.size())/totalBlockCount; 
+		cityFireCover = (totalBlockCount - fireCover.size())/totalBlockCount; 
 
 		// find health level
 		cityHealthLevel = getCityHealthLevel(hospitals.size(), totalPopulation);
 		
-		double change = workVacancies;
-		change -= cityCrimeLevel * CRIME_ATTRITION_RATE * numberOfHouseholds;
-		change += cityHealthLevel * HEALTH_ATTRITION_RATE * numberOfHouseholds;
-		change -= cityFireCover * CRIME_ATTRITION_RATE * numberOfHouseholds;
-		change += NATURAL_MONTHLY_GROWTH * numberOfHouseholds;
-
+		Map<Building, Double> wellBeingMap = getWellBeing(recreationCover);
 		
+		double change = 0;
+		change -= cityCrimeLevel * CRIME_ATTRITION_RATE * numberOfHouseholds;
+		change -= cityFireCover * FIRE_ATTRITION_RATE * numberOfHouseholds;
+		change += cityHealthLevel * HEALTH_ATTRITION_RATE * numberOfHouseholds;
+		change += NATURAL_MONTHLY_GROWTH * numberOfHouseholds;
+	
+		// people arrive to fill jobs
+		change += workVacancies * VACANCY_FILL_RATE;
+		
+		int populationDelta = (int) change;
+		applyOccupancyChange(populationDelta, residentialVacancies, residentialCapacity, wellBeingMap);
+		
+		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
+		applyOccupancyChange(workforceDelta, workVacancies, commerceCapacity, wellBeingMap);
+	
 		
 	}
 	

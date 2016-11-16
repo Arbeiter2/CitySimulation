@@ -24,14 +24,23 @@ abstract public class OccupiedBuilding extends Building {
 	}
 	
 	// number of people using this building
-	int numberOfOccupants;
+	protected int numberOfOccupants;
 	
-	public void setNumberOfOccupants(int numOccupants) 
+	
+	/**
+	 * Add new occupants to building (can be negative)
+	 * 
+	 * @param numOccupants desired change to occupancy
+	 * @return new numberOfOccupants
+	 */
+	public int addOccupants(int numOccupants) 
 	{
-		numberOfOccupants = numOccupants;
+		if (numberOfOccupants + numOccupants >= 0 && numberOfOccupants + numOccupants <= capacity)
+			numberOfOccupants += numOccupants;
+		return numberOfOccupants;
 	}
 	
-	int getNumberOfOccupants()
+	public int getNumberOfOccupants()
 	{
 		return numberOfOccupants;
 	}

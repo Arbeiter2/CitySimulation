@@ -43,7 +43,7 @@ public class LandBlock extends GeoBlock {
 	 */
 	boolean hasFireCover = false;
 	
-	public boolean hasFireCover() {
+	public boolean getFireCover() {
 		return hasFireCover;
 	}
 
