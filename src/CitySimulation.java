@@ -8,7 +8,6 @@ import java.util.Set;
 
 public class CitySimulation implements GameClock
 {
-	
 	//
 	// Tax &amp; inflation
 	//
@@ -33,8 +32,35 @@ public class CitySimulation implements GameClock
 	// rates for all types of occupied buildings
 	HashMap<TaxSource, Double> taxRates;
 
-	public double getTaxRate(TaxSource taxClass) {
+	/**
+	 * Get tax rate for specified class of building
+	 * 
+	 * @param taxClass class of building
+	 * @return 
+	 */
+	public double getTaxRate(TaxSource taxClass) 
+	{
 		return taxRates.get(taxClass);
+	}
+
+	/**
+	 * Set tax rate for specified class of building
+	 * 
+	 * If rate is valid, new rate is returned, otherwise old rate is returned
+	 * 
+	 * @param rate tax rate in range 0.0 to 1.0
+	 * @param taxClass class of building
+	 * @return new rate on success, old rate on failure
+	 */
+	public double setTaxRate(double rate, TaxSource taxClass) 
+	{
+		if (rate >= 0 && rate <= 1.0)
+		{
+			taxRates.put(taxClass, rate);
+			return rate;
+		}
+		else
+			return taxRates.get(taxClass);
 	}
 	
 	public void setTaxRate(TaxSource taxClass, double rate) {
@@ -85,11 +111,37 @@ public class CitySimulation implements GameClock
 	// rate of monthly growth corresponding to 10% per annum
 	public static final double NATURAL_MONTHLY_GROWTH = 1.008;
 	
+	// current month of simulation
+	int currentMonth;
+	
+	/**
+	 * Get current month of simulation
+	 * 
+	 * @return the currentMonth
+	 */
+	public int getCurrentMonth() 
+	{
+		return currentMonth;
+	}
+
 	// total population
 	int totalPopulation = 0;
 	
+	/**
+	 * Get total population of residential buildings
+	 * 
+	 * @return totalPopulation
+	 */
+	public int getTotalPopulation() 
+	{
+		return totalPopulation;
+	}
+
 	// grid of blocks representing map
 	GeoBlock[][] grid;
+
+	
+	// all blocks on which buildings can be placed
 	HashSet<LandBlock> buildableBlocks;
 	
 	
@@ -117,17 +169,39 @@ public class CitySimulation implements GameClock
 	// width of grid
 	int gridWidth;
 	
+	/**
+	 * @return the gridWidth
+	 */
+	public int getGridWidth() 
+	{
+		return gridWidth;
+	}
+
 	// height of grid
 	int gridHeight;
 	
+	/**
+	 * @return the gridHeight
+	 */
+	public int getGridHeight() 
+	{
+		return gridHeight;
+	}
+
 	// available cash for construction, tax etc.
 	int bankBalance;
+
+	public int getBankBalance() 
+	{
+		return bankBalance;
+	}
 
 	CitySimulation(int width, int height, int startBudget)
 	{
 		gridWidth = width;
 		gridHeight = height;
 		bankBalance = startBudget;
+		currentMonth = 1;
 		
 		// create grid of blocks
 		grid = new GeoBlock[gridWidth][gridHeight];
@@ -167,6 +241,18 @@ public class CitySimulation implements GameClock
 	}
 	
 
+	/**
+	 * Get block at specified location
+	 * 
+	 * @param p x,y zero-based grid index
+	 * @return
+	 */
+	public GeoBlock getBlock(Point p)
+	{
+		return grid[p.x][p.y];
+	}
+	
+	
 	/**
 	 * Place a building on a LandBlock.
 	 * 
@@ -210,6 +296,9 @@ public class CitySimulation implements GameClock
 				((LandBlock) grid[x][y]).addBuilding(b);
 			}
 		}
+		
+		// deduct construction cost from balance
+		bankBalance -= b.getConstructionCost();
 		
 		// update view of LandBlocks with construction
 		builtupLand = getBuiltupLand();
@@ -502,6 +591,12 @@ public class CitySimulation implements GameClock
 	
 
 	
+	/**
+	 * Get total capacity of collection of OccupiedBuilding
+	 * 
+	 * @param buildings
+	 * @return
+	 */
 	public int getTotalCapacity(List<OccupiedBuilding> buildings)
 	{
 		int retVal = 0;
@@ -512,6 +607,12 @@ public class CitySimulation implements GameClock
 		return retVal;
 	}
 
+	/**
+	 * Get total number of occupants of collection of OccupiedBuilding
+	 * 
+	 * @param buildings
+	 * @return
+	 */
 	public int getTotalOccupants(List<OccupiedBuilding> buildings)
 	{
 		int retVal = 0;
@@ -656,6 +757,81 @@ public class CitySimulation implements GameClock
 		}
 	}
 	
+	/**
+	 * Calculate total tax revenue for collection of buildings
+	 * 
+	 * @param month game simulation month
+	 * @param taxClass residential/commercial/industrial
+	 * @param buildings List of OccupiedBuilding
+	 * @return total tax revenue
+	 */
+	double getTaxRevenue(int month, CitySimulation.TaxSource taxClass, List<OccupiedBuilding> buildings)
+	{
+		double rate = getTaxRate(taxClass);
+
+		// calculate tax revenue
+		double revenue = 0d;
+		for (OccupiedBuilding bldg : buildings)
+		{
+			revenue += bldg.getTaxRevenue(rate, month);
+		}
+		return revenue;
+	}
+	
+	/**
+	 * Calculate total tax revenue for all taxable buildings
+	 * 
+	 * @param month game simulation month
+	 * @return
+	 */
+	public double getTotalTaxRevenue(int month)
+	{
+		double total = 0d;
+		
+		total += getTaxRevenue(month, TaxSource.RESIDENTIAL, residentBldgs);
+		total += getTaxRevenue(month, TaxSource.COMMERCIAL, commerceBldgs);
+		total += getTaxRevenue(month, TaxSource.INDUSTRIAL, industryBldgs);
+		
+		return total;
+	}
+
+	/**
+	 * Calculate total tax spend for collection of municipal buildings
+	 * 
+	 * @param month game simulation month
+	 * @param buildings List of MunicipalBuilding
+	 * @return total tax spend
+	 */	
+	double getTaxSpend(int month, List<MunicipalBuilding> buildings)
+	{
+		// calculate tax revenue
+		double cost = 0d;
+		for (MunicipalBuilding bldg : buildings)
+		{
+			cost += bldg.getMonthlyCost(month);
+		}
+		return cost;
+	}
+	
+	
+	/**
+	 * Calculate total tax spend for all municipal buildings
+	 * 
+	 * @param month
+	 * @return
+	 */
+	public double getTotalTaxSpend(int month)
+	{
+		double total = 0d;
+		
+		total += getTaxSpend(month, fireStations);
+		total += getTaxSpend(month, policeStations);
+		total += getTaxSpend(month, hospitals);
+		total += getTaxSpend(month, recreationBldgs);
+		
+		return total;		
+	}
+	
 	public void tick(int month)
 	{
 		// for finding police/fire coverage
@@ -670,9 +846,7 @@ public class CitySimulation implements GameClock
 		int workingPopulation = numberOfHouseholds * WORKING_FAMILY_MEMBERS;
 		int commerceCapacity = getTotalCapacity(commerceBldgs);
 		int industrialCapacity = getTotalCapacity(industryBldgs);
-		
-		int commerceWorkers = getTotalOccupants(commerceBldgs);
-		int industryWorkers = getTotalOccupants(industryBldgs);
+
 		int workVacancies = (commerceCapacity + industrialCapacity) - workingPopulation;
 		
 		// find police cover
@@ -703,7 +877,16 @@ public class CitySimulation implements GameClock
 		applyOccupancyChange(workforceDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
 		applyOccupancyChange(workforceDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
 		
-		resetMuniCover(new HashSet<LandBlock>(builtupLand.values()));
+		// update fire and police cover
+		Set<LandBlock> builtup = new HashSet<LandBlock>(builtupLand.values());
+		resetMuniCover(builtup);
+		setFireCover(builtup);
+		setPoliceCover(builtup);
+		
+		// update bank balance
+		this.bankBalance += this.getTotalTaxRevenue(month);
+		this.bankBalance -= this.getTotalTaxSpend(month);
+		
 	}
 	
 }

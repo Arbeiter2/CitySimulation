@@ -7,11 +7,11 @@ import java.awt.Point;
  */
 public class LandBlock extends GeoBlock {
 
-	LandBlock(Point p, VegetationType v)
+	LandBlock(Point p, Terrain.Type v)
 	{
 		super(p);
 		construction = null;
-		cover = v;
+		terrain = v;
 	}
 	
 	void addBuilding(Building b)
@@ -78,12 +78,20 @@ public class LandBlock extends GeoBlock {
 			construction.setPoliceCover(hasPoliceCover);
 	}
 
-	//public double getConstructionMultiplier();
+	/**
+	 * Get cost multiplier for terrain type
+	 * 
+	 * @return
+	 */
+	public double getConstructionMultiplier()
+	{
+		return Terrain.getConstructionMultiplier(terrain);
+	}
+	
+	
 	//public double getCrimeLevel();
 	//public double getLandValue();
 	//public double getWellbeingValue();
-	private VegetationType cover;
-	
-	public enum VegetationType { FOREST, GRASS, ROCK };
+	private Terrain.Type terrain;
 	
 }

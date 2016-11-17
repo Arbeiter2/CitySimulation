@@ -46,8 +46,6 @@ abstract public class OccupiedBuilding extends Building {
 	}
 	
 
-	double value;
-	
 	/**
 	 * Get real estate valuation  of taxable building
 	 * 
@@ -56,20 +54,22 @@ abstract public class OccupiedBuilding extends Building {
 	 * @param month month of simulation
 	 * @return building value
 	 */
-	public void setValue(int month)
+	public double getValue(int month)
 	{
-		value = getConstructionCost() * Math.pow((1.0 + CitySimulation.MONTHLY_INFLATION_RATE), (month - getConstructionMonth()));
+		return getConstructionCost() * Math.pow((1.0 + CitySimulation.MONTHLY_INFLATION_RATE), (month - getConstructionMonth()));
+
 	}
 	
-	public double getValue()
-	{
-		return value;
-	}
-	
+	/**
+	 * Calculate tax revenue using inflation adjusted value of building for specified month
+	 *  
+	 * @param rate tax rate
+	 * @param month simulation month
+	 * @return
+	 */
 	public double getTaxRevenue(double rate, int month)
 	{
-		setValue(month);
-		return rate * (capacity - numberOfOccupants)/capacity * value;
+		return rate * (capacity - numberOfOccupants)/capacity * getValue(month);
 	}
 	
 

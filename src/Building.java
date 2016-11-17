@@ -7,14 +7,14 @@ import java.awt.Point;
  * @author dwgreenidge
  *
  */
-abstract public class Building {
+abstract public class Building 
+{
 	public Building(int constrMonth, int basicCost)
 	{
 		constructionMonth = constrMonth;
 		basicConstructionCost = basicCost;
 		
 		// construction costs rise with inflation
-		constructionCost = constrMonth * (1.0 + CitySimulation.MONTHLY_INFLATION_RATE) * basicConstructionCost;
 		height = width = 0;
 		capacity = 0;
 	}
@@ -26,21 +26,37 @@ abstract public class Building {
 		return location;
 	}
 
-	public void setLocation(LandBlock loc) {
+	/**
+	 * Set destination LandBlock for building
+	 *  
+	 * @param loc
+	 */
+	public void setLocation(LandBlock loc) 
+	{
 		location = loc;
+		if (location != null)
+			constructionCost = location.getConstructionMultiplier() * 
+				constructionMonth * 
+				(1.0 + CitySimulation.MONTHLY_INFLATION_RATE) * 
+				basicConstructionCost;
 	}
 
+	// height of building in blocks
 	protected int height;
 	public int getHeight() {
 		return height;
 	}
 
-
+	// width of building in blocks
 	protected int width;
 	public int getWidth() {
 		return width;
 	}
 
+	
+	/**
+	 * Remove reference to parent LandBlock
+	 */
 	public void demolish()
 	{
 		location = null;

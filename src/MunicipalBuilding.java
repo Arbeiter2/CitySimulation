@@ -7,10 +7,20 @@
 abstract public class MunicipalBuilding extends Building {
 	
 	// monthly running cost
-	protected int monthlyCost; 
-	public int getMonthlyCost()
+	protected int monthlyCost;
+	
+	
+	/**
+	 * Running cost in specified month
+	 * 
+	 * Cost rises with inflation
+	 * 
+	 * @param month month of simulation
+	 * @return inflation-adjusted running cost
+	 */
+	public double getMonthlyCost(int month)
 	{
-		return monthlyCost;
+		return monthlyCost * Math.pow((1.0 + CitySimulation.MONTHLY_INFLATION_RATE), (month - getConstructionMonth()));
 	}
 
 	
