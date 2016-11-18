@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CitySimulation implements GameClock
+public class CitySimulation
 {
 	//
 	// Tax &amp; inflation
@@ -832,8 +832,11 @@ public class CitySimulation implements GameClock
 		return total;		
 	}
 	
-	public void tick(int month)
+	public void tick()
 	{
+		// advance by one month
+		this.currentMonth++;
+		
 		// for finding police/fire coverage
 		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;
 		double totalBlockCount = (double) builtupLand.size();
@@ -884,8 +887,8 @@ public class CitySimulation implements GameClock
 		setPoliceCover(builtup);
 		
 		// update bank balance
-		this.bankBalance += this.getTotalTaxRevenue(month);
-		this.bankBalance -= this.getTotalTaxSpend(month);
+		this.bankBalance += this.getTotalTaxRevenue(currentMonth);
+		this.bankBalance -= this.getTotalTaxSpend(currentMonth);
 		
 	}
 	
