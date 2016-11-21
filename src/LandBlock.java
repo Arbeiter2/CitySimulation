@@ -93,5 +93,12 @@ public class LandBlock extends GeoBlock {
 	//public double getLandValue();
 	//public double getWellbeingValue();
 	private Terrain.Type terrain;
+
+	/**
+	 * @return terrain
+	 */
+	public Terrain.Type getTerrain() {
+		return terrain;
+	}
 	
 }

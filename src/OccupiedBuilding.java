@@ -15,9 +15,9 @@ abstract public class OccupiedBuilding extends Building {
 		return taxClass;
 	}
 
-	public OccupiedBuilding(int constrMonth, int basicCost, CitySimulation.TaxSource tax_class) 
+	public OccupiedBuilding(int constrMonth, int basicCost, CitySimulation.TaxSource tax_class, String name) 
 	{
-		super(constrMonth, basicCost);
+		super(constrMonth, basicCost, name);
 		capacity = 0;
 		numberOfOccupants = 0;
 		taxClass = tax_class;

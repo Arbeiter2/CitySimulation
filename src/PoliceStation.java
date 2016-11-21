@@ -1,4 +1,9 @@
-
+/**
+ * A police station covers a set of blocks, and reduces the levels of crime
+ * 
+ * @author dwgreenidge
+ *
+ */
 public class PoliceStation extends MunicipalBuilding {
 	public static final int HEIGHT = 2;
 	public static final int WIDTH = 2;
@@ -7,9 +12,11 @@ public class PoliceStation extends MunicipalBuilding {
 	public static final int CONSTRUCTION_COST = 2000000;
 	public static final int MONTHLY_COST = 50000;
 	
+	public static final String TYPENAME = "Police";
 	
 	public PoliceStation(int constrMonth, int basicCost, int mthlyCost) {
-		super(constrMonth, PoliceStation.COVERAGE, PoliceStation.CONSTRUCTION_COST, PoliceStation.MONTHLY_COST);
+		super(constrMonth, PoliceStation.COVERAGE, PoliceStation.CONSTRUCTION_COST, 
+				PoliceStation.MONTHLY_COST, PoliceStation.TYPENAME);
 		height = PoliceStation.HEIGHT;
 		width = PoliceStation.WIDTH;
 		capacity = PoliceStation.CAPACITY;

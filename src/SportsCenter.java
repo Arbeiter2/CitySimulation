@@ -8,9 +8,11 @@ public class SportsCenter extends RecreationBuilding {
 	public static final int CONSTRUCTION_COST = 750000;
 	public static final int MONTHLY_COST = 15000;
 	
+	public static final String TYPENAME = "Sports center";
 	
 	public SportsCenter(int constrMonth, int basicCost, int mthlyCost) {
-		super(constrMonth, SportsCenter.COVERAGE, SportsCenter.CONSTRUCTION_COST, SportsCenter.MONTHLY_COST);
+		super(constrMonth, SportsCenter.COVERAGE, SportsCenter.CONSTRUCTION_COST, 
+				SportsCenter.MONTHLY_COST, SportsCenter.TYPENAME);
 		height = SportsCenter.HEIGHT;
 		width = SportsCenter.WIDTH;
 		capacity = SportsCenter.CAPACITY;

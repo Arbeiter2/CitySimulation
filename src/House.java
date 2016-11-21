@@ -12,11 +12,13 @@ public class House extends ResidentialBuilding
 	public static final int WIDTH = 1;
 	public static final int CAPACITY = 1;
 	public static final int CONSTRUCTION_COST = 80000;
+
+	public static final String TYPENAME = "House";
 	
 	public House(int constrMonth) {
-		super(constrMonth, CONSTRUCTION_COST);
+		super(constrMonth, CONSTRUCTION_COST, House.TYPENAME);
 		height = House.HEIGHT;
 		width = House.WIDTH;
-		capacity = CAPACITY;
+		capacity = House.CAPACITY;
 	}
 }

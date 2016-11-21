@@ -33,9 +33,9 @@ abstract public class MunicipalBuilding extends Building {
 	}
 
 
-	public MunicipalBuilding(int constrMonth, int cover, int basicCost, int mthlyCost) 
+	public MunicipalBuilding(int constrMonth, int cover, int basicCost, int mthlyCost, String type) 
 	{
-		super(constrMonth, basicCost);
+		super(constrMonth, basicCost, type);
 		coverage = cover;
 		monthlyCost = mthlyCost;
 		capacity = 0;

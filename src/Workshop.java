@@ -10,9 +10,11 @@ public class Workshop extends IndustrialBuilding {
 	public static final int WIDTH = 2;
 	public static final int CAPACITY = 10;
 	public static final int CONSTRUCTION_COST = 500000;
+
+	public static final String TYPENAME = "Workshop";
 	
 	public Workshop(int constrMonth) {
-		super(constrMonth, Workshop.CONSTRUCTION_COST);
+		super(constrMonth, Workshop.CONSTRUCTION_COST, TYPENAME);
 		height = Workshop.HEIGHT;
 		width = Workshop.WIDTH;
 		capacity = Workshop.CAPACITY;

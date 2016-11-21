@@ -9,7 +9,7 @@ import java.awt.Point;
  */
 abstract public class Building 
 {
-	public Building(int constrMonth, int basicCost)
+	public Building(int constrMonth, int basicCost, String name)
 	{
 		constructionMonth = constrMonth;
 		basicConstructionCost = basicCost;
@@ -17,6 +17,7 @@ abstract public class Building
 		// construction costs rise with inflation
 		height = width = 0;
 		capacity = 0;
+		typeName = name;
 	}
 	
 	// LandBlock containing building
@@ -126,6 +127,15 @@ abstract public class Building
 	public void tick(int month)
 	{
 		
+	}
+	
+	/**
+	 * text description of building
+	 */
+	protected String typeName;
+	public String getTypeName()
+	{
+		return typeName;
 	}
 
 }
