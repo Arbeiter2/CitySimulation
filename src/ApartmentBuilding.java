@@ -17,9 +17,7 @@ public class ApartmentBuilding extends ResidentialBuilding {
 	
 	public ApartmentBuilding(int constrMonth) 
 	{
-		super(constrMonth, CONSTRUCTION_COST, ApartmentBuilding.TYPENAME);
-		height = ApartmentBuilding.HEIGHT;
-		width = ApartmentBuilding.WIDTH;
-		capacity = ApartmentBuilding.CAPACITY;
+		super(constrMonth, CONSTRUCTION_COST, ApartmentBuilding.HEIGHT, ApartmentBuilding.WIDTH,
+				 ApartmentBuilding.CAPACITY, ApartmentBuilding.TYPENAME);
 	}
 }

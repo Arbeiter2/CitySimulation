@@ -15,13 +15,10 @@ public class LargePark extends RecreationBuilding {
 
 	
 	
-	public LargePark(int constrMonth, int basicCost, int mthlyCost) 
+	public LargePark(int constrMonth) 
 	{
-		super(constrMonth, LargePark.COVERAGE, LargePark.CONSTRUCTION_COST, 
-				LargePark.MONTHLY_COST, LargePark.TYPENAME);
-		height = LargePark.HEIGHT;
-		width = LargePark.WIDTH;
-		capacity = LargePark.CAPACITY;
+		super(constrMonth, LargePark.CONSTRUCTION_COST, LargePark.HEIGHT, LargePark.WIDTH, LargePark.CAPACITY, 
+				LargePark.COVERAGE, LargePark.MONTHLY_COST, LargePark.TYPENAME);
 	}
 
 }

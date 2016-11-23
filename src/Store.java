@@ -8,12 +8,10 @@ public class Store extends CommercialBuilding {
 
 	public static final String TYPENAME = "Store";
 	
-	public Store(int constrMonth, int basicCost) 
+	public Store(int constrMonth) 
 	{
-		super(constrMonth, CONSTRUCTION_COST, Store.TYPENAME);
-		height = Store.HEIGHT;
-		width = Store.WIDTH;
-		capacity = Store.CAPACITY;
+		super(constrMonth, CONSTRUCTION_COST, Store.HEIGHT, Store.WIDTH,
+				 Store.CAPACITY, Store.TYPENAME);
 	}
 
 }

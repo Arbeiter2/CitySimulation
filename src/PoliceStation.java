@@ -14,11 +14,9 @@ public class PoliceStation extends MunicipalBuilding {
 	
 	public static final String TYPENAME = "Police";
 	
-	public PoliceStation(int constrMonth, int basicCost, int mthlyCost) {
-		super(constrMonth, PoliceStation.COVERAGE, PoliceStation.CONSTRUCTION_COST, 
-				PoliceStation.MONTHLY_COST, PoliceStation.TYPENAME);
-		height = PoliceStation.HEIGHT;
-		width = PoliceStation.WIDTH;
-		capacity = PoliceStation.CAPACITY;
+	public PoliceStation(int constrMonth) 
+	{
+		super(constrMonth, PoliceStation.CONSTRUCTION_COST, PoliceStation.HEIGHT, PoliceStation.WIDTH, PoliceStation.CAPACITY, 
+				PoliceStation.COVERAGE, PoliceStation.MONTHLY_COST, PoliceStation.TYPENAME);
 	}
 }

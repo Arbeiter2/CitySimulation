@@ -15,10 +15,8 @@ public class Factory extends IndustrialBuilding {
 	
 	public Factory(int constrMonth) 
 	{
-		super(constrMonth, Factory.CONSTRUCTION_COST, Factory.TYPENAME);
-		height = Factory.HEIGHT;
-		width = Factory.WIDTH;
-		capacity = Factory.CAPACITY;
+		super(constrMonth, CONSTRUCTION_COST, Factory.HEIGHT, Factory.WIDTH,
+				 Factory.CAPACITY, Factory.TYPENAME);
 	}
 
 }

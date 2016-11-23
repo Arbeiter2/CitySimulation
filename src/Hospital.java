@@ -1,4 +1,9 @@
-
+/**
+ * Sole health care source. 
+ * 
+ * @author Delano Greenidge
+ *
+ */
 public class Hospital extends MunicipalBuilding {
 	public static final int HEIGHT = 2;
 	public static final int WIDTH = 2;
@@ -9,12 +14,10 @@ public class Hospital extends MunicipalBuilding {
 	
 	public static final String TYPENAME = "Hospital";
 	
-	public Hospital(int constrMonth, int basicCost, int mthlyCost) {
-		super(constrMonth, Hospital.COVERAGE, Hospital.CONSTRUCTION_COST, 
-				Hospital.MONTHLY_COST, Hospital.TYPENAME);
-		height = Hospital.HEIGHT;
-		width = Hospital.WIDTH;
-		capacity = Hospital.CAPACITY;
+	public Hospital(int constrMonth) 
+	{
+		super(constrMonth, Hospital.CONSTRUCTION_COST, Hospital.HEIGHT, Hospital.WIDTH, Hospital.CAPACITY, 
+				Hospital.COVERAGE, Hospital.MONTHLY_COST, Hospital.TYPENAME);
 	}
 
 }

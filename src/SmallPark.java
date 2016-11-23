@@ -10,12 +10,10 @@ public class SmallPark extends RecreationBuilding {
 	
 	public static final String TYPENAME = "Small park";
 	
-	public SmallPark(int constrMonth, int basicCost, int mthlyCost) {
-		super(constrMonth, SmallPark.COVERAGE, SmallPark.CONSTRUCTION_COST, 
-				SmallPark.MONTHLY_COST, SmallPark.TYPENAME);
-		height = SmallPark.HEIGHT;
-		width = SmallPark.WIDTH;
-		capacity = SmallPark.CAPACITY;
+	public SmallPark(int constrMonth) 
+	{
+		super(constrMonth, SmallPark.CONSTRUCTION_COST, SmallPark.HEIGHT, SmallPark.WIDTH, SmallPark.CAPACITY, 
+				SmallPark.COVERAGE, SmallPark.MONTHLY_COST, SmallPark.TYPENAME);
 	}
 
 }

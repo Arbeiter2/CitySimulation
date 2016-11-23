@@ -13,11 +13,10 @@ public class Workshop extends IndustrialBuilding {
 
 	public static final String TYPENAME = "Workshop";
 	
-	public Workshop(int constrMonth) {
-		super(constrMonth, Workshop.CONSTRUCTION_COST, TYPENAME);
-		height = Workshop.HEIGHT;
-		width = Workshop.WIDTH;
-		capacity = Workshop.CAPACITY;
+	public Workshop(int constrMonth) 
+	{
+		super(constrMonth, CONSTRUCTION_COST, Workshop.HEIGHT, Workshop.WIDTH,
+				 Workshop.CAPACITY, Workshop.TYPENAME);
 	}
 
 }

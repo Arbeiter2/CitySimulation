@@ -14,11 +14,9 @@ public class FireStation extends MunicipalBuilding {
 	
 	public static final String TYPENAME = "Fire Station";
 	
-	public FireStation(int constrMonth, int basicCost, int mthlyCost) {
-		super(constrMonth, FireStation.COVERAGE, FireStation.CONSTRUCTION_COST, 
-				FireStation.MONTHLY_COST, FireStation.TYPENAME);
-		height = FireStation.HEIGHT;
-		width = FireStation.WIDTH;
-		capacity = FireStation.CAPACITY;
+	public FireStation(int constrMonth)
+	{
+		super(constrMonth, FireStation.CONSTRUCTION_COST, FireStation.HEIGHT, FireStation.WIDTH, FireStation.CAPACITY, 
+				FireStation.COVERAGE, FireStation.MONTHLY_COST, FireStation.TYPENAME);
 	}
 }

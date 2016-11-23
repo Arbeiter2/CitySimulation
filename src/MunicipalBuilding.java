@@ -26,18 +26,28 @@ abstract public class MunicipalBuilding extends Building {
 	
 	// number of blocks where in each direction over which
 	// building has effect or coverage
-	protected int coverage;
+	protected final int coverage;
 
 	public int getCoverage() {
 		return coverage;
 	}
 
 
-	public MunicipalBuilding(int constrMonth, int cover, int basicCost, int mthlyCost, String type) 
+	/**
+	 * @param constrMonth
+	 * @param basicCost
+	 * @param bheight
+	 * @param bWidth
+	 * @param capcty
+	 * @param cover
+	 * @param mthlyCost
+	 * @param name
+	 */
+	public MunicipalBuilding(int constrMonth, int basicCost, int bheight, int bWidth, int capcty, 
+			int cover, int mthlyCost, String name) 
 	{
-		super(constrMonth, basicCost, type);
+		super(constrMonth, basicCost, bheight, bWidth, capcty, name);
 		coverage = cover;
 		monthlyCost = mthlyCost;
-		capacity = 0;
 	}
 }

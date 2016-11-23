@@ -16,9 +16,7 @@ public class House extends ResidentialBuilding
 	public static final String TYPENAME = "House";
 	
 	public House(int constrMonth) {
-		super(constrMonth, CONSTRUCTION_COST, House.TYPENAME);
-		height = House.HEIGHT;
-		width = House.WIDTH;
-		capacity = House.CAPACITY;
+		super(constrMonth, CONSTRUCTION_COST, House.HEIGHT, House.WIDTH,
+				 House.CAPACITY, House.TYPENAME);
 	}
 }
