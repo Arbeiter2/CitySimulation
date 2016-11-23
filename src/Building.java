@@ -1,5 +1,3 @@
-import java.awt.Point;
-
 /**
  * A building for a LandBlock
  *
@@ -9,14 +7,23 @@ import java.awt.Point;
  */
 abstract public class Building 
 {
-	public Building(int constrMonth, int basicCost, String name)
+	/**
+	 * @param constrMonth month building was constructed
+	 * @param basicCost fixed year-0 cost of construction
+	 * @param bheight x-axis extent of building in blocks
+	 * @param bWidth y-axis extent of building in blocks
+	 * @param capcty max number of occupants/users building can handle
+	 * @param name building type name (immutable)
+	 */
+	public Building(int constrMonth, int basicCost, int bheight, int bWidth, int capcty, String name)
 	{
 		constructionMonth = constrMonth;
 		basicConstructionCost = basicCost;
 		
 		// construction costs rise with inflation
-		height = width = 0;
-		capacity = 0;
+		height = bheight;
+		width = bWidth;
+		capacity = capcty;
 		typeName = name;
 	}
 
@@ -48,13 +55,13 @@ abstract public class Building
 	}
 
 	// height of building in blocks
-	protected int height;
+	protected final int height;
 	public int getHeight() {
 		return height;
 	}
 
 	// width of building in blocks
-	protected int width;
+	protected final int width;
 	public int getWidth() {
 		return width;
 	}
@@ -72,13 +79,13 @@ abstract public class Building
 	}
 
 	// month of construction, used for calculating inflation
-	private int constructionMonth;
+	private final int constructionMonth;
 	public int getConstructionMonth() {
 		return constructionMonth;
 	}
 
 	// basic cost of construction before inflation
-	private double basicConstructionCost;
+	private final double basicConstructionCost;
 
 	public double getBasicConstructionCost() {
 		return basicConstructionCost;
@@ -126,7 +133,7 @@ abstract public class Building
 	 * For municipal buildings (fire/police stations, hospitals, etc.) 
 	 * maximum number of people they can serve
 	 */
-	protected int capacity;
+	protected final int capacity;
 	int getCapacity()
 	{
 		return capacity;
@@ -140,7 +147,7 @@ abstract public class Building
 	/**
 	 * text description of building
 	 */
-	protected String typeName;
+	protected final String typeName;
 	public String getTypeName()
 	{
 		return typeName;
