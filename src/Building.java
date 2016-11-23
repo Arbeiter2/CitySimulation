@@ -19,6 +19,9 @@ abstract public class Building
 		capacity = 0;
 		typeName = name;
 	}
+
+	public static final double DEMOLITION_COST_PER_BLOCK = 1000;
+	
 	
 	// LandBlock containing building
 	private LandBlock location;
@@ -31,8 +34,9 @@ abstract public class Building
 	 * Set destination LandBlock for building
 	 *  
 	 * @param loc
+	 * @return cost of construction
 	 */
-	public void setLocation(LandBlock loc) 
+	public double construct(LandBlock loc) 
 	{
 		location = loc;
 		if (location != null)
@@ -40,6 +44,7 @@ abstract public class Building
 				constructionMonth * 
 				(1.0 + CitySimulation.MONTHLY_INFLATION_RATE) * 
 				basicConstructionCost;
+		return constructionCost;
 	}
 
 	// height of building in blocks
@@ -57,10 +62,13 @@ abstract public class Building
 	
 	/**
 	 * Remove reference to parent LandBlock
+	 * 
+	 * @return cost of demolition
 	 */
-	public void demolish()
+	public double demolish()
 	{
 		location = null;
+		return height * width * DEMOLITION_COST_PER_BLOCK;
 	}
 
 	// month of construction, used for calculating inflation

@@ -285,7 +285,7 @@ public class CitySimulation
 		}
 		
 		// set Building location to point p
-		b.setLocation((LandBlock)  grid[p.x][p.y]);
+		b.construct((LandBlock)  grid[p.x][p.y]);
 		buildingRegister.put(b, p);
 
 		// set every LandBlock to occupied
@@ -405,7 +405,8 @@ public class CitySimulation
 		}
 
 		// building demolishes itself
-		b.demolish();
+		// and deducts cost
+		this.bankBalance -= b.demolish();
 		
 		// remove from global register
 		buildingRegister.remove(b);
