@@ -10,9 +10,7 @@ public class OfficeBuilding extends CommercialBuilding {
 	
 	public OfficeBuilding(int constrMonth) 
 	{
-		super(constrMonth, CONSTRUCTION_COST, OfficeBuilding.TYPENAME);
-		height = OfficeBuilding.HEIGHT;
-		width = OfficeBuilding.WIDTH;
-		capacity = OfficeBuilding.CAPACITY;
+		super(constrMonth, OfficeBuilding.CONSTRUCTION_COST, OfficeBuilding.HEIGHT, OfficeBuilding.WIDTH,
+				 OfficeBuilding.CAPACITY, OfficeBuilding.TYPENAME);
 	}
 }
