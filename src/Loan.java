@@ -1,4 +1,7 @@
 /**
+ * An object representing a loan, with simple interest, and 
+ * no early repayment option
+ * 
  * @author dwgreenidge
  *
  */
@@ -6,29 +9,46 @@ public class Loan
 {
 	public static final double ANNUAL_INTEREST_RATE = 0.1;
 	
-	double initialValue;
+	double principal;
 	double currentValue;
-	int term;
+	int termInYears;
 	int currentMonth;
 	double monthlyPayment;
 	
-	public void makeMonthlyPayment()
+	/**
+	 * Deduct monthly payment from balance
+	 * 
+	 * @return loan balance
+	 */
+	public double makeMonthlyPayment()
 	{
 		if (currentValue <= 0d)
-			return;
+			return currentValue;
 		
-		currentValue -= monthlyPayment;
+		currentValue -= Math.max(0d, currentValue - monthlyPayment);
 		currentMonth++;
+		
+		return currentValue;
 	}
 
+	/**
+	 * Value of monthly payment
+	 * 
+	 * @return
+	 */
 	public double getMonthlyPayment()
 	{
 		return monthlyPayment;
 	}
 	
-	public double getInitialValue()
+	/**
+	 * Get original loan value
+	 * 
+	 * @return
+	 */
+	public double getPrincipal()
 	{
-		return initialValue;
+		return principal;
 	}
 	
 	public double getBalance()
@@ -36,16 +56,22 @@ public class Loan
 		return currentValue;
 	}
 	
-	public int getTerm()
+	public int getTermInYears()
 	{
-		return term;
+		return termInYears;
+	}
+
+	
+	public int getRemainingTerm()
+	{
+		return termInYears * 12 - currentMonth;
 	}
 	
-	Loan(double value, int termInYears) 
+	Loan(double value, int term) 
 	{
-		initialValue = currentValue = value;
-		term = termInYears;
+		principal = currentValue = value;
+		termInYears = term;
 		currentMonth = 0;
-		monthlyPayment = initialValue * Math.pow(1d + ANNUAL_INTEREST_RATE, term)/(term * 12);
+		monthlyPayment = principal * Math.pow(1d + ANNUAL_INTEREST_RATE, termInYears)/(termInYears * 12);
 	}
 }
