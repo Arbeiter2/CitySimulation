@@ -12,4 +12,10 @@ public class VolcanoBlock extends LandBlock {
 	{
 		super(p, Terrain.Type.VOLCANO);
 	}
+	
+	@Override
+	public String getUsage()
+	{
+		return "V";
+	}
 }

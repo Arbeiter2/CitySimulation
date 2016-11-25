@@ -44,9 +44,9 @@ abstract public class MunicipalBuilding extends Building {
 	 * @param name
 	 */
 	public MunicipalBuilding(int constrMonth, int basicCost, int bheight, int bWidth, int capcty, 
-			int cover, int mthlyCost, String name) 
+			int cover, int mthlyCost, String name, String abbrev) 
 	{
-		super(constrMonth, basicCost, bheight, bWidth, capcty, name);
+		super(constrMonth, basicCost, bheight, bWidth, capcty, name, abbrev);
 		coverage = cover;
 		monthlyCost = mthlyCost;
 	}

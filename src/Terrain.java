@@ -47,4 +47,23 @@ public class Terrain
 		};
 		return m;
 	}
+	
+	/**
+	 * Return short name for terrain type
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public static String getAbbreviation(Terrain.Type type)
+	{
+		switch(type)
+		{
+		case FOREST: return "Fo";
+		case GRASS: return "Gr";
+		case ROCK: return "Rk";
+		case SWAMP: return "Sw";
+		case VOLCANO: return "V";
+		};
+		return "--";
+	}
 }

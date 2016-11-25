@@ -13,11 +13,12 @@ public class ApartmentBuilding extends ResidentialBuilding {
 	public static final int CAPACITY = 16;
 	public static final int CONSTRUCTION_COST = 600000;
 
-	public static final String TYPENAME = "Apartments";
+	public static final String LONG_NAME = "Apartments";
+	public static final String ABBREV= "A";
 	
 	public ApartmentBuilding(int constrMonth) 
 	{
 		super(constrMonth, CONSTRUCTION_COST, ApartmentBuilding.HEIGHT, ApartmentBuilding.WIDTH,
-				 ApartmentBuilding.CAPACITY, ApartmentBuilding.TYPENAME);
+				 ApartmentBuilding.CAPACITY, ApartmentBuilding.LONG_NAME, ApartmentBuilding.ABBREV);
 	}
 }

@@ -11,12 +11,13 @@ public class Factory extends IndustrialBuilding {
 	public static final int CAPACITY = 1000;
 	public static final int CONSTRUCTION_COST = 5000000;
 
-	public static final String TYPENAME = "Factory";
+	public static final String LONG_NAME = "Factory";
+	public static final String ABBREV = "F";
 	
 	public Factory(int constrMonth) 
 	{
 		super(constrMonth, CONSTRUCTION_COST, Factory.HEIGHT, Factory.WIDTH,
-				 Factory.CAPACITY, Factory.TYPENAME);
+				 Factory.CAPACITY, Factory.LONG_NAME, Factory.ABBREV);
 	}
 
 }

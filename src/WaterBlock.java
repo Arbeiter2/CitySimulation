@@ -12,4 +12,10 @@ public class WaterBlock extends GeoBlock {
 	{
 		super(p);
 	}
+	
+	@Override
+	public String getUsage()
+	{
+		return "Wa";
+	}
 }

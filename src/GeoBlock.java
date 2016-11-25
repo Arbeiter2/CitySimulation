@@ -6,7 +6,7 @@ import java.awt.Point;
  * @author dwgreenidge
  *
  */
-public class GeoBlock {
+abstract public class GeoBlock {
 
 	private	Point location;
 
@@ -18,4 +18,11 @@ public class GeoBlock {
 	{
 		location = p;
 	}
+	
+	/**
+	 * Short (max 2 characters) string representation of block or contents
+	 *  
+	 * @return
+	 */
+	public abstract String getUsage();
 }

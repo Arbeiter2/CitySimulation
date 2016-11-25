@@ -101,4 +101,12 @@ public class LandBlock extends GeoBlock {
 		return terrain;
 	}
 	
+	@Override
+	public String getUsage()
+	{
+		if (construction == null)
+			return Terrain.getAbbreviation(terrain);
+		else
+			return construction.getAbbrev();
+	}
 }

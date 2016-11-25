@@ -12,11 +12,12 @@ public class PoliceStation extends MunicipalBuilding {
 	public static final int CONSTRUCTION_COST = 2000000;
 	public static final int MONTHLY_COST = 50000;
 	
-	public static final String TYPENAME = "Police";
+	public static final String LONG_NAME = "Police";
+	public static final String ABBREV = "P";
 	
 	public PoliceStation(int constrMonth) 
 	{
 		super(constrMonth, PoliceStation.CONSTRUCTION_COST, PoliceStation.HEIGHT, PoliceStation.WIDTH, PoliceStation.CAPACITY, 
-				PoliceStation.COVERAGE, PoliceStation.MONTHLY_COST, PoliceStation.TYPENAME);
+				PoliceStation.COVERAGE, PoliceStation.MONTHLY_COST, PoliceStation.LONG_NAME, PoliceStation.ABBREV);
 	}
 }

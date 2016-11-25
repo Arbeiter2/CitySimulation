@@ -1,13 +1,23 @@
 import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 public class CitySimulation
 {
+	public static final int MIN_GRID_HEIGHT = 10;
+	public static final int MIN_GRID_WIDTH = 10;
+
+	public static final int DEFAULT_HEIGHT = 20;
+	public static final int DEFAULT_WIDTH = 20;
+	public static final int DEFAULT_INITIAL_BUDGET = 1000000;
+	
 	//
 	// Tax &amp; inflation
 	//
@@ -29,50 +39,7 @@ public class CitySimulation
 	public static final int FAMILY_SIZE = 4;
 	public static final int WORKING_FAMILY_MEMBERS = 2;
 	
-	// rates for all types of occupied buildings
-	HashMap<TaxSource, Double> taxRates;
 
-	/**
-	 * Get tax rate for specified class of building
-	 * 
-	 * @param taxClass class of building
-	 * @return 
-	 */
-	public double getTaxRate(TaxSource taxClass) 
-	{
-		return taxRates.get(taxClass);
-	}
-
-	/**
-	 * Set tax rate for specified class of building
-	 * 
-	 * If rate is valid, new rate is returned, otherwise old rate is returned
-	 * 
-	 * @param rate tax rate in range 0.0 to 1.0
-	 * @param taxClass class of building
-	 * @return new rate on success, old rate on failure
-	 */
-	public double setTaxRate(double rate, TaxSource taxClass) 
-	{
-		if (rate >= 0 && rate <= 1.0)
-		{
-			taxRates.put(taxClass, rate);
-			return rate;
-		}
-		else
-			return taxRates.get(taxClass);
-	}
-	
-	public void setTaxRate(TaxSource taxClass, double rate) {
-		if (rate > 0.00 && rate < 1.00)
-			this.taxRates.put(taxClass, rate);
-	}
-	
-	public static double sigmoid(double x, double factor)
-	{
-		return Math.exp(factor * x)/(1.0 + Math.exp(factor * x));
-	}
-	
 	// rate at which jobs are filled
 	public static final double VACANCY_FILL_RATE = 0.01;
 	
@@ -110,7 +77,148 @@ public class CitySimulation
 	
 	// rate of monthly growth corresponding to 10% per annum
 	public static final double NATURAL_MONTHLY_GROWTH = 1.008;
+	// rates for all types of occupied buildings
+	HashMap<TaxSource, Double> taxRates;
 	
+	// set to true when all grid entries non-null
+	boolean blocksInitialised = false;
+
+	/**
+	 * Get tax rate for specified class of building
+	 * 
+	 * @param taxClass class of building
+	 * @return 
+	 */
+	public double getTaxRate(TaxSource taxClass) 
+	{
+		return taxRates.get(taxClass);
+	}
+
+	/**
+	 * Set tax rate for specified class of building
+	 * 
+	 * If rate is valid, new rate is returned, otherwise old rate is returned
+	 * 
+	 * @param rate tax rate in range 0.0 to 1.0
+	 * @param taxClass class of building
+	 * @return new rate on success, old rate on failure
+	 */
+	public double setTaxRate(double rate, TaxSource taxClass) 
+	{
+		if (rate >= 0 && rate <= 1.0)
+		{
+			taxRates.put(taxClass, rate);
+			return rate;
+		}
+		else
+			return taxRates.get(taxClass);
+	}
+
+	
+	public static double sigmoid(double x, double factor)
+	{
+		return Math.exp(factor * x)/(1.0 + Math.exp(factor * x));
+	}
+	
+	
+	
+	/**
+	 * Load a map file into the grid.
+	 * 
+	 * Assumes that grid of gridWidth * gridHeight cells has been allocated
+	 *  
+	 * @param mapFilePath
+	 * @return
+	 */
+	public boolean loadMapFile(String mapFilePath) throws Exception
+	{
+		// ignore if initialisation complete
+		if (blocksInitialised)
+			return false;
+		
+		BufferedReader reader;
+	    String line;
+	    GeoBlock g;
+	    int lineCount = 0;
+		reader = new BufferedReader(new FileReader(mapFilePath));
+
+		while ((line = reader.readLine().trim()) != null)
+	    {
+			lineCount++;
+		    String[] tokens = line.split(",");
+		    if (tokens.length != gridWidth || lineCount > gridHeight)
+		    	break;
+		    
+		    for (int i=0; i < gridWidth; i++)
+		    {
+		    	Point p = new Point(i, lineCount-1);
+		    	switch(tokens[i])
+		    	{
+		    	case "W": g= new WaterBlock(p); break;
+		    	case "V": g= new VolcanoBlock(p); break;
+		    	case "F": g= new LandBlock(p, Terrain.Type.FOREST); break;
+		    	case "S": g= new LandBlock(p, Terrain.Type.SWAMP); break;
+		    	case "Rk": g= new LandBlock(p, Terrain.Type.ROCK); break;
+		    	default: g= new LandBlock(p, Terrain.Type.GRASS); break;
+		    	};
+		    	placeBlock(g);
+		    }
+	    }
+		reader.close();
+		
+		return checkBlocksInitialised();
+	}
+	
+	/**
+	 * Fill grid with blocks of random type, and assign random terrain to 
+	 * LandBlocks. 
+	 * 
+	 */
+	public void randomiseBlocks()
+	{
+		if (blocksInitialised)
+			return;
+		
+		Point p = new Point(0, 0);
+		GeoBlock g;
+		
+		for (int i=0; i < gridWidth; i++)
+			for (int j=0; j < gridHeight; j++)
+			{
+				p.x = i;
+				p.y = j;
+				double x = Math.random();
+				
+				if (x <= 0.7)
+				{
+					Terrain.Type terrType;
+					
+					double t = Math.random();
+					if (t <= 0.6)
+						terrType = Terrain.Type.GRASS;
+					else if (t <= 0.8)
+						terrType = Terrain.Type.FOREST;
+					else if (t <= 0.9)
+						terrType = Terrain.Type.SWAMP;
+					else
+						terrType = Terrain.Type.ROCK;
+					
+					g = new LandBlock(p, terrType);
+				}
+				else if (x <= 0.95)
+				{
+					g = new WaterBlock(p);
+				}
+				else
+				{
+					g = new VolcanoBlock(p);
+				}
+				placeBlock(g);
+			}
+		
+		blocksInitialised = true;
+	}	
+		
 	// current month of simulation
 	int currentMonth;
 	
@@ -196,12 +304,24 @@ public class CitySimulation
 		return bankBalance;
 	}
 
-	CitySimulation(int width, int height, int startBudget)
+	CitySimulation(int width, int height, int startBudget) throws Exception
 	{
+		if (width < MIN_GRID_WIDTH || height < MIN_GRID_HEIGHT)
+		{
+			StringBuilder b = new StringBuilder();
+			b.append("Bad width/height ");
+			b.append(width);
+			b.append("/");
+			b.append(height);
+			b.append("for CitySimulation");
+			
+			throw(new Exception(b.toString()));
+		}
+		
 		gridWidth = width;
 		gridHeight = height;
 		bankBalance = startBudget;
-		currentMonth = 1;
+		currentMonth = 0;
 		
 		// create grid of blocks
 		grid = new GeoBlock[gridWidth][gridHeight];
@@ -238,6 +358,54 @@ public class CitySimulation
 		grid[p.x][p.y] = g;
 		if (g instanceof LandBlock)
 			buildableBlocks.add((LandBlock) g);
+	}
+	
+	/**
+	 * String representation of all blocks in simulation
+	 * 
+	 * @return
+	 */
+	public String getCityMap()
+	{
+		StringBuilder b = new StringBuilder();
+		
+		if (!this.blocksInitialised)
+			return b.toString();
+		
+		for (int i=0; i < gridWidth; i++)
+		{
+			for (int j=0; j < gridHeight; j++)
+			{
+				b.append(StringUtils.center(grid[i][j].getUsage(), 10));
+			}
+			b.append("\n");
+		}
+		return b.toString();
+	}
+	
+	/**
+	 * Check whether every block in grid has been filled
+	 * 
+	 * Update blocksInitialised if necessary
+	 * 
+	 * @return blocksInitialised
+	 */
+	public boolean checkBlocksInitialised()
+	{
+		if (blocksInitialised)
+			return blocksInitialised;
+		
+		int count=0;
+		for (int i=0; i < gridWidth; i++)
+			for (int j=0; j < gridHeight; j++)
+				if (grid[i][j] == null)
+					break;
+				else
+					count++;
+		
+		blocksInitialised = (count == gridWidth * gridHeight);
+		
+		return blocksInitialised;
 	}
 	
 

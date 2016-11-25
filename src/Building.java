@@ -15,7 +15,7 @@ abstract public class Building
 	 * @param capcty max number of occupants/users building can handle
 	 * @param name building type name (immutable)
 	 */
-	public Building(int constrMonth, int basicCost, int bheight, int bWidth, int capcty, String name)
+	public Building(int constrMonth, int basicCost, int bheight, int bWidth, int capcty, String name, String abbrev)
 	{
 		constructionMonth = constrMonth;
 		basicConstructionCost = basicCost;
@@ -24,7 +24,8 @@ abstract public class Building
 		height = bheight;
 		width = bWidth;
 		capacity = capcty;
-		typeName = name;
+		longName = name;
+		abbrevName = abbrev;
 	}
 
 	public static final double DEMOLITION_COST_PER_BLOCK = 1000;
@@ -147,10 +148,15 @@ abstract public class Building
 	/**
 	 * text description of building
 	 */
-	protected final String typeName;
-	public String getTypeName()
+	protected final String longName;
+	public String getLongName()
 	{
-		return typeName;
+		return longName;
 	}
 
+	protected final String abbrevName;
+	public String getAbbrev()
+	{
+		return abbrevName;
+	}	
 }

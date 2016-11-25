@@ -12,12 +12,13 @@ public class Hospital extends MunicipalBuilding {
 	public static final int CONSTRUCTION_COST = 2000000;
 	public static final int MONTHLY_COST = 50000;
 	
-	public static final String TYPENAME = "Hospital";
+	public static final String LONG_NAME = "Hospital";
+	public static final String ABBREV = "H";
 	
 	public Hospital(int constrMonth) 
 	{
 		super(constrMonth, Hospital.CONSTRUCTION_COST, Hospital.HEIGHT, Hospital.WIDTH, Hospital.CAPACITY, 
-				Hospital.COVERAGE, Hospital.MONTHLY_COST, Hospital.TYPENAME);
+				Hospital.COVERAGE, Hospital.MONTHLY_COST, Hospital.LONG_NAME, Hospital.ABBREV);
 	}
 
 }
