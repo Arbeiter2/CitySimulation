@@ -40,6 +40,9 @@ abstract public class OccupiedBuilding extends Building {
 		return numberOfOccupants;
 	}
 	
+	/**
+	 * @return
+	 */
 	public int getNumberOfOccupants()
 	{
 		return numberOfOccupants;
@@ -69,7 +72,7 @@ abstract public class OccupiedBuilding extends Building {
 	 */
 	public double getTaxRevenue(double rate, int month)
 	{
-		return rate * (capacity - numberOfOccupants)/capacity * getValue(month);
+		return rate * (double)numberOfOccupants/capacity * getValue(month);
 	}
 	
 

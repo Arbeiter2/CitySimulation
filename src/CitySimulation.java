@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class CitySimulation
@@ -180,7 +181,8 @@ public class CitySimulation
 			return;
 		
 		Point p = new Point(0, 0);
-		GeoBlock g;
+		GeoBlock g = null;
+
 		
 		for (int i=0; i < gridWidth; i++)
 			for (int j=0; j < gridHeight; j++)
@@ -189,7 +191,7 @@ public class CitySimulation
 				p.y = j;
 				double x = Math.random();
 				
-				if (x <= 0.7)
+				if (x <= 0.8)
 				{
 					Terrain.Type terrType;
 					
@@ -205,7 +207,7 @@ public class CitySimulation
 					
 					g = new LandBlock(p, terrType);
 				}
-				else if (x <= 0.95)
+				else if (x <= 0.99)
 				{
 					g = new WaterBlock(p);
 				}
@@ -413,13 +415,31 @@ public class CitySimulation
 	 * Get block at specified location
 	 * 
 	 * @param p x,y zero-based grid index
-	 * @return
+	 * @return null if invalid coordinates
 	 */
 	public GeoBlock getBlock(Point p)
 	{
-		return grid[p.x][p.y];
+		if (p != null)
+			return getBlock(p.x, p.y);
+		else
+			return null;
 	}
 	
+
+	/**
+	 * Get block at specified location
+	 * 
+	 * @param x
+	 * @param y
+	 * @return null if invalid coordinates
+	 */
+	public GeoBlock getBlock(int x, int y)
+	{
+		if (x >= 0 && x < gridWidth && y >=0 && y < gridHeight)
+			return grid[x][y];
+		else
+			return null;
+	}
 	
 	/**
 	 * Place a building on a LandBlock.

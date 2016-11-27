@@ -1,16 +1,22 @@
 // package bugs;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import javafx.application.Application;
-import javafx.geometry.Insets; 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.layout.ColumnConstraints; 
-import javafx.scene.layout.GridPane; 
-import javafx.scene.layout.RowConstraints; 
-import javafx.scene.layout.StackPane; 
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage; 
 
 public class CitySimApplication extends Application { 
@@ -24,6 +30,11 @@ public class CitySimApplication extends Application {
 	
 	boolean randomiseBlocks = false;
 	
+	Map<String, String> blockColours = new HashMap<String, String>();
+	Map<String, String> textColours = new HashMap<String, String>();
+	
+	ContextMenu contextMenu = new ContextMenu();
+
 	@Override 
     public void start(Stage primaryStage) throws Exception 
     {
@@ -36,6 +47,8 @@ public class CitySimApplication extends Application {
 			e.printStackTrace();
 			throw (e);
 		}
+		
+		initialise();
 
         StackPane stackPane = new StackPane(); 
         stackPane.setPadding(new Insets(8)); 
@@ -47,6 +60,96 @@ public class CitySimApplication extends Application {
         primaryStage.setScene(scene); 
         primaryStage.show(); 
     }
+	
+	private void initialise()
+	{
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.FOREST), "green");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.GRASS), "lightgreen");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.ROCK), "grey");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.SWAMP), "darkgreen");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.VOLCANO), "sienna");
+		blockColours.put("Wa", "lightblue");
+
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.FOREST), "#FFFFFF");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.GRASS), "#000000");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.ROCK), "#FFFFFF");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.SWAMP), "#FFFFFF");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.VOLCANO), "#FFFFFF");		
+		textColours.put("Wa", "#000000");
+		
+
+		MenuItem info = new MenuItem("Info");
+		info.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Info");
+		    }
+		});
+
+		Menu construct = new Menu("New Building");
+
+		// residential buildings
+		Menu residential = new Menu("Residential");
+		MenuItem house = new MenuItem("House");
+		house.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("House");
+		    }
+		});
+		MenuItem apartments = new MenuItem("Apartments");
+		apartments.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Apartments");
+		    }
+		});
+		residential.getItems().addAll(house, apartments);
+
+		// commercial buildings
+		Menu commercial = new Menu("Commercial");
+
+		MenuItem store = new MenuItem("Store");
+		store.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Store");
+		    }
+		});
+
+		MenuItem shoppingMall = new MenuItem("Shopping Mall");
+		shoppingMall.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Shopping Mall");
+		    }
+		});
+		commercial.getItems().addAll(store, shoppingMall);
+
+		// industrial buildings
+		Menu industrial = new Menu("Industrial");
+
+		MenuItem workshop = new MenuItem("Workshop");
+		workshop.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Workshop");
+		    }
+		});
+
+		MenuItem factory = new MenuItem("Factory");
+		factory.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Factory");
+		    }
+		});
+		industrial.getItems().addAll(workshop, factory);
+
+		MenuItem demolish = new MenuItem("Demolish");
+		demolish.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		        System.out.println("Demolish");
+		    }
+		});
+		construct.getItems().addAll(residential, commercial, industrial);
+		contextMenu.getItems().addAll(info, construct, demolish);
+		
+		
+	}
     
     private void processArgs(Parameters params) throws Exception
     {
@@ -87,7 +190,7 @@ public class CitySimApplication extends Application {
 			engine.loadMapFile(mapFilePath);
     }
 
-    @SuppressWarnings("unchecked")
+
 	private GridPane setupGridPane() { 
         GridPane gridPane = new GridPane(); 
         gridPane.setStyle("-fx-border-color: black;"); 
@@ -106,13 +209,17 @@ public class CitySimApplication extends Application {
 
         for (int column = 0; column < width; column++) { 
             for (int row = 0; row < height; row++) { 
-                final StackPane spCell = new StackPane(); 
-                @SuppressWarnings("rawtypes")
-				ChoiceBox cb = new ChoiceBox();
-                cb.getItems().addAll("Land", "Water");
+                final StackPane spCell = new StackPane();
+                String abbrev = engine.getBlock(column, row).getUsage();
+                Label lb = new Label(abbrev);
+                lb.setContextMenu(contextMenu);
 
-                spCell.getChildren().add(cb); 
-                spCell.setStyle("-fx-background-color: lightblue; -fx-border-color: red"); 
+                lb.setTextFill(Color.web(textColours.get(abbrev)));
+                
+                spCell.getChildren().add(lb);
+                spCell.setStyle("-fx-background-color: " + blockColours.get(abbrev) +"; -fx-border-color: red"); 
+
+                
                 gridPane.add(spCell, column, row); 
             } 
         } 
