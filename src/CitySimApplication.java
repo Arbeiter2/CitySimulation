@@ -17,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.control.Control;
 import javafx.stage.Stage; 
 
 public class CitySimApplication extends Application { 
@@ -33,7 +34,6 @@ public class CitySimApplication extends Application {
 	Map<String, String> blockColours = new HashMap<String, String>();
 	Map<String, String> textColours = new HashMap<String, String>();
 	
-	ContextMenu contextMenu = new ContextMenu();
 
 	@Override 
     public void start(Stage primaryStage) throws Exception 
@@ -61,23 +61,10 @@ public class CitySimApplication extends Application {
         primaryStage.show(); 
     }
 	
-	private void initialise()
+	private void addContextMenu(Control control, LandBlock block)
 	{
-		blockColours.put(Terrain.getAbbreviation(Terrain.Type.FOREST), "green");
-		blockColours.put(Terrain.getAbbreviation(Terrain.Type.GRASS), "lightgreen");
-		blockColours.put(Terrain.getAbbreviation(Terrain.Type.ROCK), "grey");
-		blockColours.put(Terrain.getAbbreviation(Terrain.Type.SWAMP), "darkgreen");
-		blockColours.put(Terrain.getAbbreviation(Terrain.Type.VOLCANO), "sienna");
-		blockColours.put("Wa", "lightblue");
-
-		textColours.put(Terrain.getAbbreviation(Terrain.Type.FOREST), "#FFFFFF");
-		textColours.put(Terrain.getAbbreviation(Terrain.Type.GRASS), "#000000");
-		textColours.put(Terrain.getAbbreviation(Terrain.Type.ROCK), "#FFFFFF");
-		textColours.put(Terrain.getAbbreviation(Terrain.Type.SWAMP), "#FFFFFF");
-		textColours.put(Terrain.getAbbreviation(Terrain.Type.VOLCANO), "#FFFFFF");		
-		textColours.put("Wa", "#000000");
+		ContextMenu contextMenu = new ContextMenu();
 		
-
 		MenuItem info = new MenuItem("Info");
 		info.setOnAction(new EventHandler<ActionEvent>() {
 		    public void handle(ActionEvent e) {
@@ -148,7 +135,25 @@ public class CitySimApplication extends Application {
 		construct.getItems().addAll(residential, commercial, industrial);
 		contextMenu.getItems().addAll(info, construct, demolish);
 		
+        control.setContextMenu(contextMenu);
 		
+	}
+	
+	private void initialise()
+	{
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.FOREST), "green");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.GRASS), "lightgreen");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.ROCK), "grey");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.SWAMP), "darkgreen");
+		blockColours.put(Terrain.getAbbreviation(Terrain.Type.VOLCANO), "sienna");
+		blockColours.put("Wa", "lightblue");
+
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.FOREST), "#FFFFFF");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.GRASS), "#000000");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.ROCK), "#FFFFFF");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.SWAMP), "#FFFFFF");
+		textColours.put(Terrain.getAbbreviation(Terrain.Type.VOLCANO), "#FFFFFF");		
+		textColours.put("Wa", "#000000");
 	}
     
     private void processArgs(Parameters params) throws Exception
@@ -212,7 +217,9 @@ public class CitySimApplication extends Application {
                 final StackPane spCell = new StackPane();
                 String abbrev = engine.getBlock(column, row).getUsage();
                 Label lb = new Label(abbrev);
-                lb.setContextMenu(contextMenu);
+                
+                if (!abbrev.equals("Wa"))
+                	addContextMenu(lb, (LandBlock) engine.getBlock(column, row));
 
                 lb.setTextFill(Color.web(textColours.get(abbrev)));
                 

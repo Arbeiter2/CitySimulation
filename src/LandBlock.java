@@ -14,10 +14,14 @@ public class LandBlock extends GeoBlock {
 		terrain = v;
 	}
 	
-	void addBuilding(Building b)
+	boolean addBuilding(Building b)
 	{
 		if (construction == null && b != null)
+		{
 			construction = b;
+			return true;
+		}
+		return false;
 	}
 	
 	void demolishBuilding()
