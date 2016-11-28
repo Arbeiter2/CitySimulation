@@ -180,15 +180,14 @@ public class CitySimulation
 		if (blocksInitialised)
 			return;
 		
-		Point p = new Point(0, 0);
+		Point p;
 		GeoBlock g = null;
 
 		
 		for (int i=0; i < gridWidth; i++)
 			for (int j=0; j < gridHeight; j++)
 			{
-				p.x = i;
-				p.y = j;
+				p = new Point(i, j);
 				double x = Math.random();
 				
 				if (x <= 0.8)
@@ -448,7 +447,7 @@ public class CitySimulation
 	 * clear of buildings.
 	 * 
 	 * @param b Building
-	 * @param p grid location of top left corner
+	 * @param p grid location of building NW corner
 	 * @return true successful; false failed
 	 */
 	public boolean placeBuilding(Building b, Point p)
@@ -456,18 +455,22 @@ public class CitySimulation
 		if (b == null || p == null) 
 			return false;
 		
-		// p represents upper left corner of building;
+		// p represents upper left corner of building; 
+		// building must fit within grid
+		if (p.x < 0 || p.y < 0 || p.x + b.getWidth() - 1 >= gridWidth || p.y + b.getHeight() - 1 >= gridHeight)
+			return false;
+		
 		// check whether surrounding blocks are clear LandBlocks
-		for (int x=p.x; x < b.getWidth(); x++)
+		for (int x=0; x < b.getWidth(); x++)
 		{
-			for (int y=p.y; y < b.getHeight(); y++)
+			for (int y=0; y < b.getHeight(); y++)
 			{
 				// we can only build on a land block
-				if (!(grid[x][y] instanceof LandBlock))
+				if (!(grid[p.x + x][p.y + y] instanceof LandBlock))
 					return false;	
 				
 				// block must be clear
-				if (((LandBlock) grid[x][y]).getConstruction() != null)
+				if (((LandBlock) grid[p.x + x][p.y + y]).getConstruction() != null)
 					return false;
 			}
 		}
@@ -477,11 +480,11 @@ public class CitySimulation
 		buildingRegister.put(b, p);
 
 		// set every LandBlock to occupied
-		for (int x=p.x; x < b.getWidth(); x++)
+		for (int x=0; x < b.getWidth(); x++)
 		{
-			for (int y=p.y; y < b.getHeight(); y++)
+			for (int y=0; y < b.getHeight(); y++)
 			{
-				((LandBlock) grid[x][y]).addBuilding(b);
+				((LandBlock) grid[p.x + x][p.y + y]).addBuilding(b);
 			}
 		}
 		
@@ -497,11 +500,11 @@ public class CitySimulation
 		{
 		case "PoliceStation": 
 			policeStations.add((MunicipalBuilding) b);
-			policeCover = getMuniBuildingCover(policeStations, builtupLand);
+			policeCover = getMuniBuildingCover(policeStations);
 			break;
 		case "FireStation": 
 			fireStations.add((MunicipalBuilding) b); 
-			fireCover = getMuniBuildingCover(fireStations, builtupLand);
+			fireCover = getMuniBuildingCover(fireStations);
 			break;
 		case "Hospital": hospitals.add((MunicipalBuilding) b); break;
 		
@@ -513,13 +516,19 @@ public class CitySimulation
 			case "CommercialBuilding": commerceBldgs.add((CommercialBuilding) b); break;
 			case "RecreationBuilding": 
 				recreationBldgs.add((MunicipalBuilding) b); 
-				recreationCover = getMuniBuildingCover(recreationBldgs, builtupLand);
+				recreationCover = getMuniBuildingCover(recreationBldgs);
 				break;
 			
 			default: System.out.println("Unknown building type ["+bldgClassName+"]");
 			};
 			break;
-		};		
+		};
+		
+		//Set<LandBlock> builtup = new HashSet<LandBlock>(builtupLand.values());
+		resetMuniCover();
+		setPoliceCover(policeCover);
+		setFireCover(fireCover);
+
 		return true;
 	}
 
@@ -652,16 +661,15 @@ public class CitySimulation
 	 * Updates all 
 	 * 
 	 * @param buildings list of buildings (should all be same class)
-	 * @param builtupLand Map of occupied LandBlocks 
 	 * @return Set of covered LandBlocks
 	 */
-	Map<LandBlock, Integer> getMuniBuildingCover(List<MunicipalBuilding> buildings, Map<Point, LandBlock> builtupLand)
+	Map<LandBlock, Integer> getMuniBuildingCover(List<MunicipalBuilding> buildings)
 	{
 		HashMap<LandBlock, Integer>covered = new HashMap<LandBlock, Integer>();
 		
 		int coverage, height, width;
 		LandBlock block;
-		Point position, testPos = new Point(0,0);
+		Point position;
 		
 		for (MunicipalBuilding p : buildings)
 		{
@@ -669,32 +677,23 @@ public class CitySimulation
 			position = p.getLocation().getLocation();
 			coverage = p.getCoverage();
 			height = p.getHeight();
-			width = p.getWidth()
-			;		
-			int startX = (position.x - coverage> 0 ? position.x - coverage: position.x);
-			int startY = (position.y - coverage > 0 ? position.y - coverage: position.y);
-			int endX = (position.x + width + coverage < gridWidth ? position.x + width + coverage : gridWidth );
-			int endY = (position.y + height + coverage < gridHeight ? position.y + height+ coverage : gridHeight );
+			width = p.getWidth();
+	
+			int startX = Math.max(position.x - coverage, 0);
+			int startY = Math.max(position.y - coverage, 0);
+			int endX = Math.min(position.x + width + coverage, gridWidth);
+			int endY = Math.min(position.y + height + coverage, gridHeight);
 			for (int i=startX; i < endX; i++)
 			{
 				for (int j=startY; j < endY; j++)
 				{
-					testPos.x = i;
-					testPos.y = j;
-					block = builtupLand.get(testPos);
-					
-					// block is covered, but not LandBlock
-					if (block == null)
+					if (!(grid[i][j] instanceof LandBlock))
 						continue;
-					
-					// final check that block is occupied
-					if (block.getConstruction() != null)
-					{
-						Integer count = covered.get(p);
-						if (p == null)
-							count = 0;
-						covered.put(block, count++);
-					}
+					block = (LandBlock) grid[i][j];
+					Integer count = covered.get(p);
+					if (count == null)
+						count = 0;
+					covered.put(block, ++count);
 				}
 			}
 		}
@@ -707,9 +706,9 @@ public class CitySimulation
 	 * 
 	 * @param land Set of LandBlocks
 	 */
-	void resetMuniCover(Set<LandBlock> land)
+	void resetMuniCover()
 	{
-		for (LandBlock block : land)
+		for (LandBlock block : buildableBlocks)
 		{
 			block.setFireCover(false);
 			block.setPoliceCover(false);
@@ -721,11 +720,16 @@ public class CitySimulation
 	 * 
 	 * @param covered Set of LandBlocks
 	 */
-	void setFireCover(Set<LandBlock> covered)
+	void setFireCover(Map<LandBlock, Integer> covered)
 	{
-		for (LandBlock block : covered)
+		if (covered == null)
+			return;
+		
+		for (Map.Entry<LandBlock, Integer> entry : covered.entrySet())
 		{
-			block.setFireCover(true);
+			LandBlock block = entry.getKey();
+			Integer count = entry.getValue();			
+			block.setFireCover(count > 0);
 		}
 	}
 	
@@ -733,12 +737,17 @@ public class CitySimulation
 	 * Set blocks to police covered
 	 * 
 	 * @param covered Set of LandBlocks
-	 */	
-	void setPoliceCover(Set<LandBlock> covered)
+	 */
+	void setPoliceCover(Map<LandBlock, Integer> covered)
 	{
-		for (LandBlock block : covered)
+		if (covered == null)
+			return;
+		
+		for (Map.Entry<LandBlock, Integer> entry : covered.entrySet())
 		{
-			block.setPoliceCover(true);
+			LandBlock block = entry.getKey();
+			Integer count = entry.getValue();			
+			block.setPoliceCover(count > 0);
 		}
 	}	
 	
@@ -997,7 +1006,7 @@ public class CitySimulation
 		double cost = 0d;
 		for (MunicipalBuilding bldg : buildings)
 		{
-			cost += bldg.getMonthlyCost(month);
+			cost += bldg.getAdjustedMonthlyCost(month);
 		}
 		return cost;
 	}
@@ -1069,12 +1078,7 @@ public class CitySimulation
 		applyOccupancyChange(workforceDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
 		applyOccupancyChange(workforceDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
 		
-		// update fire and police cover
-		Set<LandBlock> builtup = new HashSet<LandBlock>(builtupLand.values());
-		resetMuniCover(builtup);
-		setFireCover(builtup);
-		setPoliceCover(builtup);
-		
+	
 		// update bank balance
 		this.bankBalance += this.getTotalTaxRevenue(currentMonth);
 		this.bankBalance -= this.getTotalTaxSpend(currentMonth);

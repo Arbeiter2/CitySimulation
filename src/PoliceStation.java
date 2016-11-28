@@ -5,8 +5,8 @@
  *
  */
 public class PoliceStation extends MunicipalBuilding {
-	public static final int HEIGHT = 2;
-	public static final int WIDTH = 2;
+	public static final int HEIGHT = 1;
+	public static final int WIDTH = 1;
 	public static final int COVERAGE = 8;
 	public static final int CAPACITY = 500;
 	public static final int CONSTRUCTION_COST = 2000000;
@@ -19,5 +19,6 @@ public class PoliceStation extends MunicipalBuilding {
 	{
 		super(constrMonth, PoliceStation.CONSTRUCTION_COST, PoliceStation.HEIGHT, PoliceStation.WIDTH, PoliceStation.CAPACITY, 
 				PoliceStation.COVERAGE, PoliceStation.MONTHLY_COST, PoliceStation.LONG_NAME, PoliceStation.ABBREV);
+		setPoliceCover(true);
 	}
 }

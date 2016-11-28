@@ -17,7 +17,7 @@ public class House extends ResidentialBuilding
 	public static final String ABBREV = "Ho";
 	
 	public House(int constrMonth) {
-		super(constrMonth, CONSTRUCTION_COST, House.HEIGHT, House.WIDTH,
+		super(constrMonth, House.CONSTRUCTION_COST, House.HEIGHT, House.WIDTH,
 				 House.CAPACITY, House.LONG_NAME, House.ABBREV);
 	}
 }

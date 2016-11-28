@@ -49,8 +49,7 @@ abstract public class Building
 		location = loc;
 		if (location != null)
 			constructionCost = location.getConstructionMultiplier() * 
-				constructionMonth * 
-				(1.0 + CitySimulation.MONTHLY_INFLATION_RATE) * 
+				Math.pow(1.0 + CitySimulation.MONTHLY_INFLATION_RATE, constructionMonth) * 
 				basicConstructionCost;
 		return constructionCost;
 	}
@@ -105,7 +104,7 @@ abstract public class Building
 	 */
 	boolean hasFireCover = false;
 	
-	public boolean hasFireCover() {
+	public boolean getFireCover() {
 		return hasFireCover;
 	}
 
