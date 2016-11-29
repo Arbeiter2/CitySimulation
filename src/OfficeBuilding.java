@@ -7,7 +7,7 @@ public class OfficeBuilding extends CommercialBuilding {
 	public static final int CONSTRUCTION_COST = 1600000;
 
 	public static final String LONG_NAME = "Offices";
-	public static final String ABBREV = "O";
+	public static final String ABBREV = "Of";
 	
 	public OfficeBuilding(int constrMonth) 
 	{

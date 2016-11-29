@@ -3,7 +3,7 @@
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
-
+import javafx.application.Platform;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -125,11 +125,8 @@ public class CitySimApplication extends Application {
 				new SeparatorMenuItem(), smallPark, largePark, sportsCenter);
 
 		MenuItem demolish = new MenuItem("Demolish");
-		demolish.setOnAction(new EventHandler<ActionEvent>() {
-		    public void handle(ActionEvent e) {
-		        System.out.println("Demolish");
-		    }
-		});
+		demolish.setOnAction(new DemolitionHandler(block, this));
+
 		construct.getItems().addAll(residential, commercial, industrial, municipal);
 		contextMenu.getItems().addAll(info, new SeparatorMenuItem(), construct, demolish);
 		
@@ -170,6 +167,31 @@ public class CitySimApplication extends Application {
 			}
 		
 	}
+
+	
+	public void demolishBuilding(LandBlock b)
+	{
+		if (b == null)
+			return;
+
+		Building bldg = b.getConstruction();
+		if (bldg == null)
+			return;
+		Point p = bldg.getLocation().getLocation();
+		engine.demolishBuilding(bldg);
+		
+		for (int column=0; column < bldg.getWidth(); column++)
+			for (int row=0; row < bldg.getHeight(); row++)
+			{
+				String abbrev = ((LandBlock) engine.getBlock(p.x + column, p.y + row)).getUsage();
+                
+				StackPane spCell = (StackPane) this.getNodeByRowColumnIndex(p.x + column, p.y + row, gridPane);
+                spCell.setStyle("-fx-background-color: " + blockColours.get(abbrev) +"; -fx-border-color: red"); 
+
+                ((Label) spCell.getChildren().get(0)).setTextFill(Color.web(textColours.get(abbrev)));
+				panelGrid[p.x + column][p.y + row].setText(abbrev);
+			}
+	}
 	
 	@SuppressWarnings("static-access")
 	public Node getNodeByRowColumnIndex (final int column, final int row, GridPane gridPane) {
@@ -193,6 +215,13 @@ public class CitySimApplication extends Application {
     	String h = args.get("height");
     	String w = args.get("width");
     	String b = args.get("budget");
+    	String help = args.get("help");
+    	
+    	if (help != null)
+    	{
+    		getUsage();
+    		
+    	}
 
     	if (h != null && w != null
     	&& Integer.parseInt(h) >= CitySimulation.MIN_GRID_HEIGHT 
@@ -222,7 +251,27 @@ public class CitySimApplication extends Application {
     	if (randomiseBlocks)
 			engine.randomiseBlocks();
 		else
-			engine.loadMapFile(mapFilePath);
+		{
+			if (!engine.loadMapFile(mapFilePath))
+			{
+				
+			}
+		}
+			
+    }
+    
+    void getUsage()
+    {
+    	StringBuilder b = new StringBuilder();
+    	b.append("\t--height=<map-height> (default: " + CitySimulation.MIN_GRID_HEIGHT  + ")\n");
+    	b.append("\t--width=<map-width> (default: " + CitySimulation.MIN_GRID_WIDTH  + ")\n");
+    	b.append("\t--budget=<starting-budget> (default: " + CitySimulation.DEFAULT_INITIAL_BUDGET + "\n");
+    	b.append("\t--mapfile=<filepath>\n");
+    	
+    	System.out.println(b.toString());
+    	
+        Platform.exit();
+        System.exit(0);    	
     }
 
 

@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 
 public class CitySimulation
@@ -143,8 +141,9 @@ public class CitySimulation
 	    int lineCount = 0;
 		reader = new BufferedReader(new FileReader(mapFilePath));
 
-		while ((line = reader.readLine().trim()) != null)
+		while ((line = reader.readLine()) != null)
 	    {
+			line = line.trim();
 			lineCount++;
 		    String[] tokens = line.split(",");
 		    if (tokens.length != gridWidth || lineCount > gridHeight)
@@ -155,10 +154,10 @@ public class CitySimulation
 		    	Point p = new Point(i, lineCount-1);
 		    	switch(tokens[i])
 		    	{
-		    	case "W": g= new WaterBlock(p); break;
+		    	case "Wa": g= new WaterBlock(p); break;
 		    	case "V": g= new VolcanoBlock(p); break;
-		    	case "F": g= new LandBlock(p, Terrain.Type.FOREST); break;
-		    	case "S": g= new LandBlock(p, Terrain.Type.SWAMP); break;
+		    	case "Fo": g= new LandBlock(p, Terrain.Type.FOREST); break;
+		    	case "Sw": g= new LandBlock(p, Terrain.Type.SWAMP); break;
 		    	case "Rk": g= new LandBlock(p, Terrain.Type.ROCK); break;
 		    	default: g= new LandBlock(p, Terrain.Type.GRASS); break;
 		    	};
@@ -166,6 +165,8 @@ public class CitySimulation
 		    }
 	    }
 		reader.close();
+		
+		
 		
 		return checkBlocksInitialised();
 	}
@@ -592,12 +593,11 @@ public class CitySimulation
 	 */
 	private void demolishBuildingInternal(Point p, Building b)
 	{
-		for (int x=p.x; x < b.getWidth(); x++)
+		for (int x=0; x < b.getWidth(); x++)
 		{
-			for (int y=p.y; y < b.getHeight(); y++)
+			for (int y=0; y < b.getHeight(); y++)
 			{
-				((LandBlock) grid[x][y]).demolishBuilding();
-				grid[x][y] = null;
+				((LandBlock) grid[p.x+x][p.y+y]).demolishBuilding();
 			}
 		}
 

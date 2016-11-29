@@ -6,13 +6,13 @@
  */
 public class Factory extends IndustrialBuilding {
 	
-	public static final int HEIGHT = 10;
-	public static final int WIDTH = 10;
+	public static final int HEIGHT = 4;
+	public static final int WIDTH = 4;
 	public static final int CAPACITY = 1000;
 	public static final int CONSTRUCTION_COST = 5000000;
 
 	public static final String LONG_NAME = "Factory";
-	public static final String ABBREV = "F";
+	public static final String ABBREV = "Fa";
 	
 	public Factory(int constrMonth) 
 	{
