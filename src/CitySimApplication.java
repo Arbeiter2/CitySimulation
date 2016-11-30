@@ -1,13 +1,12 @@
 // package bugs;
 
 import java.awt.Point;
+import javafx.scene.control.TextArea;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -16,8 +15,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -45,7 +47,10 @@ public class CitySimApplication extends Application {
 	
 	Label[][] panelGrid = null;
 	GridPane gridPane;
-
+	ToolBar toolbar = new ToolBar();
+	HBox statusbar = new HBox();
+	TextArea statusText = new TextArea();
+	
 	@Override 
     public void start(Stage primaryStage) throws Exception 
     {
@@ -61,23 +66,46 @@ public class CitySimApplication extends Application {
 		
 		initialise();
 
+
+		BorderPane borderPane = new BorderPane();
+		borderPane.setTop(toolbar);
+		borderPane.setCenter(setupGridPane());
+		borderPane.setBottom(statusbar);
+	    statusbar.setPadding(new Insets(15, 12, 15, 12));
+	    statusbar.setSpacing(10);
+	    //statusbar.setStyle("-fx-background-color: #336699;");
+	    statusbar.getChildren().addAll(new Label("Info"), statusText);
+	    
+	    statusText.setEditable(false);
+
+		statusText.setPrefRowCount(10);
+		statusText.setPrefColumnCount(30);
+		statusText.setMaxWidth(330);
+
+		/* 
         StackPane stackPane = new StackPane(); 
         stackPane.setPadding(new Insets(8)); 
         stackPane.setPrefWidth(646); 
         stackPane.setPrefHeight(480); 
         stackPane.getChildren().add(setupGridPane()); 
+        */
 
-        Scene scene = new Scene(stackPane); 
+        Scene scene = new Scene(borderPane); 
         primaryStage.setScene(scene); 
         primaryStage.show(); 
     }
+	
+	public void setStatuxText(String msg)
+	{
+		statusText.setText(msg);
+	}
 	
 	private void addContextMenu(Control control, LandBlock block)
 	{
 		ContextMenu contextMenu = new ContextMenu();
 		
 		MenuItem info = new MenuItem("Info");
-		info.setOnAction(new InfoHandler(block));
+		info.setOnAction(new InfoHandler(block, this));
 
 		Menu construct = new Menu("New Building");
 

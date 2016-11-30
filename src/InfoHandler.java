@@ -4,21 +4,24 @@ import javafx.event.EventHandler;
 public class InfoHandler implements EventHandler<ActionEvent> {
 
 	LandBlock block;
-	public InfoHandler(LandBlock b) 
+	CitySimApplication engine;
+	
+	public InfoHandler(LandBlock b, CitySimApplication app) 
 	{
 		block = b;
+		engine = app;
 	}
 
 	@Override
 	public void handle(ActionEvent event) 
 	{
 		StringBuilder b = new StringBuilder();
-		b.append("Grid location: (" + block.getLocation().x + ", " + block.getLocation().y +")\n");
-		b.append("Terrain: " + block.getTerrain().toString() + "\n");
+		b.append("Grid location = (" + block.getLocation().x + ", " + block.getLocation().y +")\n");
+		b.append("Terrain = " + block.getTerrain().toString() + "\n");
 		b.append("Police cover = " + (block.getPoliceCover()? "Yes" : "No") + "\n");
 		b.append("Fire cover = " + (block.getFireCover() ? "Yes" : "No") + "\n");
 		Building bldg = block.getConstruction();
-		b.append("Building type: " );
+		b.append("Building type = " );
 		if (bldg == null)
 			b.append("Unoccupied\n");
 		else
@@ -36,6 +39,7 @@ public class InfoHandler implements EventHandler<ActionEvent> {
 			}
 		}
 		System.out.println(b.toString() + "\n");
+		engine.setStatuxText(b.toString());
 	}
 
 }

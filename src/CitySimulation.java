@@ -127,7 +127,7 @@ public class CitySimulation
 	 * Assumes that grid of gridWidth * gridHeight cells has been allocated
 	 *  
 	 * @param mapFilePath
-	 * @return
+	 * @return true if successful, false otherwise
 	 */
 	public boolean loadMapFile(String mapFilePath) throws Exception
 	{
