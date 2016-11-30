@@ -1,5 +1,6 @@
 // package bugs;
 
+import javafx.scene.control.Button;
 import java.awt.Point;
 import javafx.scene.control.TextArea;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -15,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -24,7 +25,9 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.control.Control;
-import javafx.stage.Stage; 
+import javafx.stage.Stage;
+import javafx.scene.control.TextField;
+import javafx.event.ActionEvent;
 
 public class CitySimApplication extends Application { 
 
@@ -47,9 +50,12 @@ public class CitySimApplication extends Application {
 	
 	Label[][] panelGrid = null;
 	GridPane gridPane;
-	ToolBar toolbar = new ToolBar();
+	HBox toolbar = new HBox();
+	TextField budgetDisplay = new TextField();
+	TextField monthDisplay = new TextField();
 	HBox statusbar = new HBox();
 	TextArea statusText = new TextArea();
+	Button endTurnBtn = new Button("End turn");
 	
 	@Override 
     public void start(Stage primaryStage) throws Exception 
@@ -74,21 +80,31 @@ public class CitySimApplication extends Application {
 	    statusbar.setPadding(new Insets(15, 12, 15, 12));
 	    statusbar.setSpacing(10);
 	    //statusbar.setStyle("-fx-background-color: #336699;");
-	    statusbar.getChildren().addAll(new Label("Info"), statusText);
+	    statusbar.getChildren().addAll(new Label("Info"), statusText, endTurnBtn);
 	    
 	    statusText.setEditable(false);
-
 		statusText.setPrefRowCount(10);
 		statusText.setPrefColumnCount(30);
 		statusText.setMaxWidth(330);
 
-		/* 
-        StackPane stackPane = new StackPane(); 
-        stackPane.setPadding(new Insets(8)); 
-        stackPane.setPrefWidth(646); 
-        stackPane.setPrefHeight(480); 
-        stackPane.getChildren().add(setupGridPane()); 
-        */
+		budgetDisplay.setText(String.format("%d", engine.getBankBalance())); 
+		budgetDisplay.setEditable(false);
+		monthDisplay.setText(Integer.toString(engine.getCurrentMonth())); 
+		monthDisplay.setEditable(false);
+		
+		toolbar.setPadding(new Insets(15, 12, 15, 12));
+		toolbar.setSpacing(10);
+		
+		toolbar.getChildren().addAll(new Label("Budget"), budgetDisplay, new Label("Month"), monthDisplay);
+		
+		endTurnBtn.setOnAction(new EventHandler<ActionEvent>() {
+		    @Override 
+		    public void handle(ActionEvent e) {
+		        engine.tick();
+		        budgetDisplay.setText(String.format("%d", engine.getBankBalance()));
+				monthDisplay.setText(Integer.toString(engine.getCurrentMonth())); 
+		    }
+		});
 
         Scene scene = new Scene(borderPane); 
         primaryStage.setScene(scene); 
@@ -193,6 +209,7 @@ public class CitySimApplication extends Application {
 
 				panelGrid[p.x + column][p.y + row].setText(b.getAbbrev());
 			}
+		budgetDisplay.setText(Double.toString(engine.getBankBalance())); 
 		
 	}
 
@@ -219,6 +236,8 @@ public class CitySimApplication extends Application {
                 ((Label) spCell.getChildren().get(0)).setTextFill(Color.web(textColours.get(abbrev)));
 				panelGrid[p.x + column][p.y + row].setText(abbrev);
 			}
+		budgetDisplay.setText(Double.toString(engine.getBankBalance())); 
+
 	}
 	
 	@SuppressWarnings("static-access")

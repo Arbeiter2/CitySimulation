@@ -15,7 +15,7 @@ public class CitySimulation
 
 	public static final int DEFAULT_HEIGHT = 20;
 	public static final int DEFAULT_WIDTH = 20;
-	public static final int DEFAULT_INITIAL_BUDGET = 1000000;
+	public static final int DEFAULT_INITIAL_BUDGET = 10000000;
 	
 	//
 	// Tax &amp; inflation
@@ -270,10 +270,12 @@ public class CitySimulation
 	
 	//
 	// record of LandBlocks with construction 
-	Map<Point, LandBlock> builtupLand;
+	Map<Point, LandBlock> builtupLand = new HashMap<Point, LandBlock>();
 	
 	// record of LandBlocks covered by various municipal buildings
-	Map<LandBlock, Integer> fireCover, policeCover, recreationCover;
+	Map<LandBlock, Integer> fireCover = new HashMap<LandBlock, Integer>(), 
+			policeCover = new HashMap<LandBlock, Integer>(), 
+			recreationCover = new HashMap<LandBlock, Integer>();
 	
 	
 	// width of grid
@@ -499,14 +501,8 @@ public class CitySimulation
 		String bldgClassName = b.getClass().getName();
 		switch (bldgClassName)
 		{
-		case "PoliceStation": 
-			policeStations.add((MunicipalBuilding) b);
-			policeCover = getMuniBuildingCover(policeStations);
-			break;
-		case "FireStation": 
-			fireStations.add((MunicipalBuilding) b); 
-			fireCover = getMuniBuildingCover(fireStations);
-			break;
+		case "PoliceStation": policeStations.add((MunicipalBuilding) b); break;
+		case "FireStation": fireStations.add((MunicipalBuilding) b); break;
 		case "Hospital": hospitals.add((MunicipalBuilding) b); break;
 		
 		default:
@@ -517,7 +513,7 @@ public class CitySimulation
 			case "CommercialBuilding": commerceBldgs.add((CommercialBuilding) b); break;
 			case "RecreationBuilding": 
 				recreationBldgs.add((MunicipalBuilding) b); 
-				recreationCover = getMuniBuildingCover(recreationBldgs);
+				recreationCover = getMuniBuildingCover(recreationBldgs, recreationCover);
 				break;
 			
 			default: System.out.println("Unknown building type ["+bldgClassName+"]");
@@ -527,7 +523,9 @@ public class CitySimulation
 		
 		//Set<LandBlock> builtup = new HashSet<LandBlock>(builtupLand.values());
 		resetMuniCover();
+		policeCover = getMuniBuildingCover(policeStations, policeCover);
 		setPoliceCover(policeCover);
+		fireCover = getMuniBuildingCover(fireStations, fireCover);
 		setFireCover(fireCover);
 
 		return true;
@@ -627,7 +625,13 @@ public class CitySimulation
 			default: System.out.println("Unknown building type ["+bldgClassName+"]");
 			};
 			break;
-		};				
+		};
+		
+		resetMuniCover();
+		policeCover = getMuniBuildingCover(policeStations, policeCover);
+		setPoliceCover(policeCover);
+		fireCover = getMuniBuildingCover(fireStations, fireCover);
+		setFireCover(fireCover);		
 	}
 
 	/**
@@ -661,15 +665,20 @@ public class CitySimulation
 	 * Updates all 
 	 * 
 	 * @param buildings list of buildings (should all be same class)
+	 * @param existing coverage map
+	 * 
 	 * @return Set of covered LandBlocks
 	 */
-	Map<LandBlock, Integer> getMuniBuildingCover(List<MunicipalBuilding> buildings)
+	Map<LandBlock, Integer> getMuniBuildingCover(List<MunicipalBuilding> buildings, Map<LandBlock, Integer> covered)
 	{
-		HashMap<LandBlock, Integer>covered = new HashMap<LandBlock, Integer>();
-		
 		int coverage, height, width;
 		LandBlock block;
 		Point position;
+		
+		if (covered != null)
+			covered.clear();
+		else
+			covered = new HashMap<LandBlock, Integer>();
 		
 		for (MunicipalBuilding p : buildings)
 		{
@@ -681,8 +690,8 @@ public class CitySimulation
 	
 			int startX = Math.max(position.x - coverage, 0);
 			int startY = Math.max(position.y - coverage, 0);
-			int endX = Math.min(position.x + width + coverage, gridWidth);
-			int endY = Math.min(position.y + height + coverage, gridHeight);
+			int endX = Math.min(position.x + width + coverage - 1, gridWidth);
+			int endY = Math.min(position.y + height + coverage - 1, gridHeight);
 			for (int i=startX; i < endX; i++)
 			{
 				for (int j=startY; j < endY; j++)
@@ -690,6 +699,8 @@ public class CitySimulation
 					if (!(grid[i][j] instanceof LandBlock))
 						continue;
 					block = (LandBlock) grid[i][j];
+					if (block.getConstruction() == null)
+						continue;
 					Integer count = covered.get(p);
 					if (count == null)
 						count = 0;
@@ -777,7 +788,7 @@ public class CitySimulation
 	 */
 	Map<Point, LandBlock> getBuiltupLand()
 	{
-		Map<Point, LandBlock> builtupLand = new HashMap<Point, LandBlock>();
+		builtupLand.clear();
 		
 		for (LandBlock block : buildableBlocks)
 		{
@@ -835,11 +846,21 @@ public class CitySimulation
 		
 		Building b;
 		Double count;
-		for (Map.Entry<LandBlock, Integer> entry : recreationMap.entrySet())
+/*		for (Map.Entry<LandBlock, Integer> entry : recreationMap.entrySet())
 		{
 			b = entry.getKey().getConstruction();
+			if (b == null)
+				continue;
 			count = wellBeingMap.get(b);
+			count = (count == null ? 0d : count);
 			wellBeingMap.put(b, Math.max(count, entry.getValue()));
+		}
+*/		
+		for (Building bldg : this.buildingRegister.keySet())
+		{
+			Integer rec = recreationMap.get(bldg.getLocation());
+
+			wellBeingMap.put(bldg, (rec == null ? 1d : (double) rec));
 		}
 		
 		// now adjust for missing fire/police cover
@@ -871,17 +892,27 @@ public class CitySimulation
 	 * @param totalCapacity total number of spaces
 	 * @param buildings OccupiedBuildings to change
 	 * @param wellBeingMap aggregate well-being value for each building
+	 * @return size of change applied
 	 */
-	void applyOccupancyChange(int delta, int vacancies, int totalCapacity, 
+	int applyOccupancyChange(int delta, int vacancies, int totalCapacity, 
 			List<OccupiedBuilding> buildings,
 			Map<Building, Double> wellBeingMap)
 	{
 		List<OccupiedBuilding> availableBldgs = new ArrayList<OccupiedBuilding>();
-		double wellBeing, totalWb = 0d;
+		Double wellBeing;
+		double totalWb = 0d;
 		
 		// do nothing if no change required, or no residential space available
-		if (delta == 0 || delta > vacancies)
-			return;
+		if (delta == 0)// || delta > vacancies)
+			return 0;
+		
+		// increase by no more than available number of vacancies
+		delta = Math.min(delta, vacancies);
+
+		// if no buildings of this type, ignore
+		if (buildings.size() == 0)
+			return 0;
+		
 		
 		for (OccupiedBuilding bldg : buildings)
 		{
@@ -893,9 +924,9 @@ public class CitySimulation
 			
 			availableBldgs.add(bldg);
 			wellBeing = wellBeingMap.get(bldg);
+			wellBeing = (wellBeing != null ? wellBeing : 0d);
 			totalWb += (delta > 0 ? wellBeing : (wellBeing == 0 ? 999 : 1.0/wellBeing));
 		}
-		
 		
 		// upper and lower bounds of ranges
 		double lBound[] = new double[availableBldgs.size()];
@@ -953,6 +984,7 @@ public class CitySimulation
 					break;
 			}
 		}
+		return delta;
 	}
 	
 	/**
@@ -1051,11 +1083,11 @@ public class CitySimulation
 		int workVacancies = (commerceCapacity + industrialCapacity) - workingPopulation;
 		
 		// find police cover
-		unprotectedRatio = (totalBlockCount - policeCover.size())/totalBlockCount; 
+		unprotectedRatio = (totalBlockCount > 0 ? (totalBlockCount - policeCover.size())/totalBlockCount : 0); 
 		cityCrimeLevel = getCityCrimeLevel(unprotectedRatio);
 
 		// find fire cover
-		cityFireCover = (totalBlockCount - fireCover.size())/totalBlockCount; 
+		cityFireCover =  (totalBlockCount > 0 ? (totalBlockCount - fireCover.size())/totalBlockCount : 0); 
 
 		// find health level
 		cityHealthLevel = getCityHealthLevel(hospitals.size(), totalPopulation);
@@ -1069,14 +1101,25 @@ public class CitySimulation
 		change += NATURAL_MONTHLY_GROWTH * numberOfHouseholds;
 	
 		// people arrive to fill jobs
-		change += workVacancies * VACANCY_FILL_RATE;
+		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
+		change += workforceDelta / WORKING_FAMILY_MEMBERS;
 		
 		int populationDelta = (int) change;
-		applyOccupancyChange(populationDelta, residentialVacancies, residentialCapacity, residentBldgs, wellBeingMap);
+		populationDelta = applyOccupancyChange(populationDelta, residentialVacancies, residentialCapacity, residentBldgs, wellBeingMap);
 		
-		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
-		applyOccupancyChange(workforceDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
-		applyOccupancyChange(workforceDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
+		if (commerceCapacity > 0 && industrialCapacity > 0)
+		{
+			applyOccupancyChange(workforceDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
+			applyOccupancyChange(workforceDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
+		}
+		else if (industrialCapacity > 0)
+		{
+			applyOccupancyChange(workforceDelta, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
+		}
+		else if (commerceCapacity > 0)
+		{
+			applyOccupancyChange(workforceDelta, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
+		}
 		
 	
 		// update bank balance
