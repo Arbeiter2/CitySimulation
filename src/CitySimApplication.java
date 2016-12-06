@@ -53,6 +53,8 @@ public class CitySimApplication extends Application {
 	HBox toolbar = new HBox();
 	TextField budgetDisplay = new TextField();
 	TextField monthDisplay = new TextField();
+	TextField populationDisplay = new TextField();
+
 	HBox statusbar = new HBox();
 	TextArea statusText = new TextArea();
 	Button endTurnBtn = new Button("End turn");
@@ -91,18 +93,25 @@ public class CitySimApplication extends Application {
 		budgetDisplay.setEditable(false);
 		monthDisplay.setText(Integer.toString(engine.getCurrentMonth())); 
 		monthDisplay.setEditable(false);
+		monthDisplay.setPrefWidth(40);
+		populationDisplay.setText(Integer.toString(engine.getTotalPopulation())); 
+		populationDisplay.setEditable(false);
+		populationDisplay.setPrefWidth(150);
 		
 		toolbar.setPadding(new Insets(15, 12, 15, 12));
 		toolbar.setSpacing(10);
 		
-		toolbar.getChildren().addAll(new Label("Budget"), budgetDisplay, new Label("Month"), monthDisplay);
+		toolbar.getChildren().addAll(new Label("Budget"), budgetDisplay, 
+				new Label("Month"), monthDisplay, 
+				new Label("Popn."), populationDisplay);
 		
 		endTurnBtn.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override 
 		    public void handle(ActionEvent e) {
 		        engine.tick();
 		        budgetDisplay.setText(String.format("%d", engine.getBankBalance()));
-				monthDisplay.setText(Integer.toString(engine.getCurrentMonth())); 
+				monthDisplay.setText(Integer.toString(engine.getCurrentMonth()));
+				populationDisplay.setText(Integer.toString(engine.getTotalPopulation())); 
 		    }
 		});
 
