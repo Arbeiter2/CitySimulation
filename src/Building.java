@@ -102,7 +102,7 @@ abstract public class Building
 	/**
 	 * whether this block is covered by at least one (1) fire station
 	 */
-	boolean hasFireCover = false;
+	private boolean hasFireCover = false;
 	
 	public boolean getFireCover() {
 		return hasFireCover;
@@ -115,7 +115,7 @@ abstract public class Building
 	/**
 	 * whether this block is covered by at least one (1) police station
 	 */
-	boolean hasPoliceCover = false;
+	private boolean hasPoliceCover = false;
 
 	public boolean getPoliceCover() {
 		return hasPoliceCover;
@@ -134,7 +134,7 @@ abstract public class Building
 	 * maximum number of people they can serve
 	 */
 	protected final int capacity;
-	int getCapacity()
+	public int getCapacity()
 	{
 		return capacity;
 	}

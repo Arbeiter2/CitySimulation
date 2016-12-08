@@ -81,6 +81,62 @@ public class CitySimulation
 	
 	// set to true when all grid entries non-null
 	boolean blocksInitialised = false;
+	
+	// loans can be used to aid spending
+	ArrayList<Loan> activeLoans = new ArrayList<Loan>();
+	
+	// maximum number of active loans
+	public static final int MAX_LOAN_COUNT = 3;
+	
+	/**
+	 * Create new loan
+	 * 
+	 * @param loanAmount
+	 * @param termInYears
+	 * @return true on success, false otherwise
+	 */
+	public boolean startLoan(double loanAmount, int termInYears)
+	{
+		if (loanAmount <= 0d || termInYears <= 0 || activeLoans.size() == MAX_LOAN_COUNT)
+			return false;
+
+		activeLoans.add(new Loan(loanAmount, termInYears));
+		
+		bankBalance += (int) loanAmount;
+		
+		return true;
+	}
+	
+	
+	
+	public final List<Loan> getLoans()
+	{
+		return activeLoans;
+	}
+	
+	public void makeLoanPayments()
+	{
+		ArrayList<Loan> deletions = new ArrayList<Loan>();
+		
+		for (Loan loan : activeLoans)
+		{
+			double payment = loan.getMonthlyPayment();
+			if (payment <= this.bankBalance)
+			{
+				bankBalance -= payment;
+				loan.makeMonthlyPayment();
+			}
+			
+			// mark for deletion if nothing left to pay
+			if (loan.getBalance() == 0d)
+				deletions.add(loan);
+		}
+		
+		for (Loan loan : deletions)
+		{
+			activeLoans.remove(loan);
+		}
+	}
 
 	/**
 	 * Get tax rate for specified class of building
@@ -301,9 +357,9 @@ public class CitySimulation
 	}
 
 	// available cash for construction, tax etc.
-	int bankBalance;
+	double bankBalance;
 
-	public int getBankBalance() 
+	public double getBankBalance() 
 	{
 		return bankBalance;
 	}
@@ -1066,6 +1122,9 @@ public class CitySimulation
 	{
 		// advance by one month
 		this.currentMonth++;
+		
+		// pay loans first
+		makeLoanPayments();		
 		
 		// for finding police/fire coverage
 		double unprotectedRatio, cityCrimeLevel, cityFireCover, cityHealthLevel;

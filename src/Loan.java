@@ -5,15 +5,20 @@
  * @author dwgreenidge
  *
  */
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 public class Loan 
 {
 	public static final double ANNUAL_INTEREST_RATE = 0.1;
 	
-	double principal;
-	double currentValue;
-	int termInYears;
-	int currentMonth;
-	double monthlyPayment;
+	SimpleDoubleProperty principal;
+	SimpleDoubleProperty currentValue;
+	SimpleIntegerProperty termInYears;
+	SimpleIntegerProperty termRemaining;
+	SimpleIntegerProperty currentMonth;
+	SimpleDoubleProperty monthlyPayment;
 	
 	/**
 	 * Deduct monthly payment from balance
@@ -22,13 +27,14 @@ public class Loan
 	 */
 	public double makeMonthlyPayment()
 	{
-		if (currentValue <= 0d)
-			return currentValue;
+		if (currentValue.get() <= 0d)
+			return currentValue.get();
 		
-		currentValue -= Math.max(0d, currentValue - monthlyPayment);
-		currentMonth++;
+		currentValue.set(Math.max(0d, currentValue.get() - monthlyPayment.get()));
+		currentMonth.set(currentMonth.get() + 1);
+		termRemaining.set(termRemaining.get() - 1);
 		
-		return currentValue;
+		return currentValue.get();
 	}
 
 	/**
@@ -38,7 +44,7 @@ public class Loan
 	 */
 	public double getMonthlyPayment()
 	{
-		return monthlyPayment;
+		return monthlyPayment.get();
 	}
 	
 	/**
@@ -48,30 +54,37 @@ public class Loan
 	 */
 	public double getPrincipal()
 	{
-		return principal;
+		return principal.get();
 	}
 	
 	public double getBalance()
 	{
-		return currentValue;
+		return currentValue.get();
 	}
 	
 	public int getTermInYears()
 	{
-		return termInYears;
+		return termInYears.get();
 	}
 
 	
-	public int getRemainingTerm()
+	public int getTermRemaining()
 	{
-		return termInYears * 12 - currentMonth;
+		return termRemaining.get();
+	}
+	
+	public static double calculateMonthlyPayment(double loanValue, int term)
+	{
+		return loanValue * Math.pow(1d + ANNUAL_INTEREST_RATE, term)/(term * 12);
 	}
 	
 	Loan(double value, int term) 
 	{
-		principal = currentValue = value;
-		termInYears = term;
-		currentMonth = 0;
-		monthlyPayment = principal * Math.pow(1d + ANNUAL_INTEREST_RATE, termInYears)/(termInYears * 12);
+		principal = new SimpleDoubleProperty(value); 
+		currentValue = new SimpleDoubleProperty(value);
+		termInYears = new SimpleIntegerProperty(term);
+		termRemaining = new SimpleIntegerProperty(term * 12);
+		currentMonth = new SimpleIntegerProperty(0);
+		monthlyPayment = new SimpleDoubleProperty(Loan.calculateMonthlyPayment(principal.get(), termInYears.get()));
 	}
 }

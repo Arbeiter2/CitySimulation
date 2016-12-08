@@ -21,6 +21,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -28,6 +29,8 @@ import javafx.scene.control.Control;
 import javafx.stage.Stage;
 import javafx.scene.control.TextField;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ComboBox;
+
 
 public class CitySimApplication extends Application { 
 
@@ -79,37 +82,47 @@ public class CitySimApplication extends Application {
 		borderPane.setBottom(statusbar);
 	    statusbar.setPadding(new Insets(15, 12, 15, 12));
 	    statusbar.setSpacing(10);
-	    //statusbar.setStyle("-fx-background-color: #336699;");
-	    statusbar.getChildren().addAll(new Label("Info"), statusText, endTurnBtn);
+		statusbar.getChildren().addAll(new Label("Info"), statusText, endTurnBtn);
 	    
 	    statusText.setEditable(false);
 		statusText.setPrefRowCount(10);
 		statusText.setPrefColumnCount(30);
 		statusText.setMaxWidth(330);
 
-		budgetDisplay.setText(String.format("%d", engine.getBankBalance())); 
+		budgetDisplay.setText(String.format("%.2f", engine.getBankBalance())); 
 		budgetDisplay.setEditable(false);
 		monthDisplay.setText(Integer.toString(engine.getCurrentMonth())); 
 		monthDisplay.setEditable(false);
+		monthDisplay.setMaxWidth(60);
+		monthDisplay.setPrefWidth(60);
 		
 		toolbar.setPadding(new Insets(15, 12, 15, 12));
 		toolbar.setSpacing(10);
+		Button b = new Button("Loans");
+		b.setOnAction(new EventHandler<ActionEvent>() {
+		    @Override public void handle(ActionEvent e) {
+		    	LoanDialog loanDlg = new LoanDialog(engine, budgetDisplay);
+		    }
+		});
 		
-		toolbar.getChildren().addAll(new Label("Budget"), budgetDisplay, new Label("Month"), monthDisplay);
+		toolbar.getChildren().addAll(new Label("Budget"), budgetDisplay, new Label("Month"), monthDisplay, b);
 		
 		endTurnBtn.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override 
 		    public void handle(ActionEvent e) {
 		        engine.tick();
-		        budgetDisplay.setText(String.format("%d", engine.getBankBalance()));
+		        budgetDisplay.setText(String.format("%.2f", engine.getBankBalance()));
 				monthDisplay.setText(Integer.toString(engine.getCurrentMonth())); 
 		    }
 		});
+		
 
         Scene scene = new Scene(borderPane); 
         primaryStage.setScene(scene); 
         primaryStage.show(); 
     }
+	
+	
 	
 	public void setStatuxText(String msg)
 	{
