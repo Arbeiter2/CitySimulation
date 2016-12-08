@@ -40,7 +40,7 @@ public class CitySimulation
 	
 
 	// rate at which jobs are filled
-	public static final double VACANCY_FILL_RATE = 0.01;
+	public static final double VACANCY_FILL_RATE = 0.05;
 	
 	//
 	// Health stats
@@ -64,10 +64,10 @@ public class CitySimulation
 	public static final double MONTHLY_CRIMES_PER_CAPITA = 0.008;
 
 	// ratio of families scared off by crime
-	public static final double CRIME_ATTRITION_RATE = 0.01;
+	public static final double CRIME_ATTRITION_RATE = 0.1;
 
 	// ratio of families scared off by no fire cover
-	public static final double FIRE_ATTRITION_RATE = 0.005;
+	public static final double FIRE_ATTRITION_RATE = 0.1;
 	
 	// controls slope of crimelevel curve
 	public static final double CRIME_SIGMOID_SCALAR = 8d;
@@ -75,7 +75,7 @@ public class CitySimulation
 	public static final double CRIME_SIGMOID_OFFSET = -0.75;
 	
 	// rate of monthly growth corresponding to 10% per annum
-	public static final double NATURAL_MONTHLY_GROWTH = 1.008;
+	public static final double NATURAL_MONTHLY_GROWTH = 0.008;
 	// rates for all types of occupied buildings
 	HashMap<TaxSource, Double> taxRates;
 	
@@ -911,7 +911,7 @@ public class CitySimulation
 			count = (count == null ? 0d : count);
 			wellBeingMap.put(b, Math.max(count, entry.getValue()));
 		}
-*/		
+*/		 
 		for (Building bldg : this.buildingRegister.keySet())
 		{
 			Integer rec = recreationMap.get(bldg.getLocation());
@@ -1153,18 +1153,20 @@ public class CitySimulation
 		
 		Map<Building, Double> wellBeingMap = getWellBeing(recreationCover);
 		
-		double change = 0;
-		change -= cityCrimeLevel * CRIME_ATTRITION_RATE * numberOfHouseholds;
-		change -= cityFireCover * FIRE_ATTRITION_RATE * numberOfHouseholds;
-		change += cityHealthLevel * HEALTH_ATTRITION_RATE * numberOfHouseholds;
+		double change;
+		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
+		change = workforceDelta / WORKING_FAMILY_MEMBERS;
 		change += NATURAL_MONTHLY_GROWTH * numberOfHouseholds;
+
+		change /= cityCrimeLevel;// * CRIME_ATTRITION_RATE;// * numberOfHouseholds;
+		change /= cityFireCover;// * FIRE_ATTRITION_RATE;// * numberOfHouseholds;
+		change /= (1d - cityHealthLevel);// * HEALTH_ATTRITION_RATE;// * numberOfHouseholds;
 	
 		// people arrive to fill jobs
-		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
-		change += workforceDelta / WORKING_FAMILY_MEMBERS;
 		
 		int populationDelta = (int) change;
 		populationDelta = applyOccupancyChange(populationDelta, residentialVacancies, residentialCapacity, residentBldgs, wellBeingMap);
+		totalPopulation = Math.max(0, totalPopulation + populationDelta);
 		
 		if (commerceCapacity > 0 && industrialCapacity > 0)
 		{
