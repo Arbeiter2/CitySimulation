@@ -75,9 +75,19 @@ abstract public class Building
 	public double demolish()
 	{
 		location = null;
-		return height * width * Building.DEMOLITION_COST_PER_BLOCK;
+		return getDemolitionCost();
 	}
 
+	/**
+	 * cost of demolition
+	 * 
+	 * @return cost of demolition
+	 */
+	public double getDemolitionCost()
+	{
+		return height * width * Building.DEMOLITION_COST_PER_BLOCK;
+	}
+	
 	// month of construction, used for calculating inflation
 	private final int constructionMonth;
 	public int getConstructionMonth() {

@@ -511,7 +511,7 @@ public class CitySimulation
 	 */
 	public boolean placeBuilding(Building b, Point p)
 	{
-		if (b == null || p == null) 
+		if (b == null || p == null || this.bankBalance < b.getConstructionCost()) 
 			return false;
 		
 		// p represents upper left corner of building; 
@@ -631,7 +631,7 @@ public class CitySimulation
 		Point p = buildingRegister.get(b);
 		
 		// building not found
-		if (p == null)
+		if (p == null || this.bankBalance < b.getDemolitionCost())
 			return false;
 		
 		demolishBuildingInternal(p, b);
@@ -1001,7 +1001,8 @@ public class CitySimulation
 		
 		double rnd;
 		boolean successful;
-		while (delta != 0)
+		int actual = delta;
+		while (actual != 0)
 		{
 			rnd = Math.random();
 			i=0;
@@ -1011,12 +1012,12 @@ public class CitySimulation
 				// if this building is chosen and can add/remove occupants, make it happen
 				if (rnd >= lBound[i] && rnd < uBound[i])
 				{
-					if (delta > 0 && bldg.getNumberOfOccupants() < bldg.getCapacity() || 
-						delta < 0 && bldg.getNumberOfOccupants() > 0)
+					if (actual > 0 && bldg.getNumberOfOccupants() < bldg.getCapacity() || 
+							actual < 0 && bldg.getNumberOfOccupants() > 0)
 					{
 						bldg.addOccupants(incr);
 						vacancies = vacancies - incr;
-						delta = delta - incr;
+						actual = actual - incr;
 
 						successful = true;
 					}
@@ -1040,7 +1041,7 @@ public class CitySimulation
 					break;
 			}
 		}
-		return delta;
+		return delta - actual;
 	}
 	
 	/**
@@ -1170,16 +1171,16 @@ public class CitySimulation
 		
 		if (commerceCapacity > 0 && industrialCapacity > 0)
 		{
-			applyOccupancyChange(workforceDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
-			applyOccupancyChange(workforceDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
+			applyOccupancyChange(populationDelta/2, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
+			applyOccupancyChange(populationDelta/2, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
 		}
 		else if (industrialCapacity > 0)
 		{
-			applyOccupancyChange(workforceDelta, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
+			applyOccupancyChange(populationDelta, workVacancies, industrialCapacity, industryBldgs, wellBeingMap);
 		}
 		else if (commerceCapacity > 0)
 		{
-			applyOccupancyChange(workforceDelta, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
+			applyOccupancyChange(populationDelta, workVacancies, commerceCapacity, commerceBldgs, wellBeingMap);
 		}
 		
 	
