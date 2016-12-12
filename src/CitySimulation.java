@@ -91,8 +91,8 @@ public class CitySimulation
 	/**
 	 * Create new loan
 	 * 
-	 * @param loanAmount
-	 * @param termInYears
+	 * @param loanAmount Principal value
+	 * @param termInYears Loan duration in years
 	 * @return true on success, false otherwise
 	 */
 	public boolean startLoan(double loanAmount, int termInYears)
@@ -142,7 +142,7 @@ public class CitySimulation
 	 * Get tax rate for specified class of building
 	 * 
 	 * @param taxClass class of building
-	 * @return 
+	 * @return tax rate for specified building type
 	 */
 	public double getTaxRate(TaxSource taxClass) 
 	{
@@ -182,8 +182,9 @@ public class CitySimulation
 	 * 
 	 * Assumes that grid of gridWidth * gridHeight cells has been allocated
 	 *  
-	 * @param mapFilePath
+	 * @param mapFilePath File system path to csv grid map
 	 * @return true if successful, false otherwise
+	 * @throws Exception if file read fails
 	 */
 	public boolean loadMapFile(String mapFilePath) throws Exception
 	{
@@ -423,7 +424,7 @@ public class CitySimulation
 	/**
 	 * String representation of all blocks in simulation
 	 * 
-	 * @return
+	 * @return multiline String representation of map
 	 */
 	public String getCityMap()
 	{
@@ -487,8 +488,8 @@ public class CitySimulation
 	/**
 	 * Get block at specified location
 	 * 
-	 * @param x
-	 * @param y
+	 * @param x x-coordinate of block
+	 * @param y y-coordinate of block
 	 * @return null if invalid coordinates
 	 */
 	public GeoBlock getBlock(int x, int y)
@@ -693,8 +694,8 @@ public class CitySimulation
 	/**
 	 * Calculate health level of city, with range (-1, 1)
 	 * 
-	 * @param numberOfHospitals
-	 * @param population
+	 * @param numberOfHospitals number of hospitals on map
+	 * @param population total population
 	 * @return percentage health level
 	 */
 	public double getCityHealthLevel(int numberOfHospitals, int population)
@@ -721,7 +722,7 @@ public class CitySimulation
 	 * Updates all 
 	 * 
 	 * @param buildings list of buildings (should all be same class)
-	 * @param existing coverage map
+	 * @param covered coverage map
 	 * 
 	 * @return Set of covered LandBlocks
 	 */
@@ -771,7 +772,6 @@ public class CitySimulation
 	/**
 	 * Turn off fire and police station cover for all blocks in set
 	 * 
-	 * @param land Set of LandBlocks
 	 */
 	void resetMuniCover()
 	{
@@ -838,11 +838,11 @@ public class CitySimulation
 	
 	
 	/**
-	 * Create Set of LandBlocks with construction
+	 * Create representation of LandBlocks with construction
 	 * 
-	 * @return
+	 * @return Map of buildable blocks containing construction
 	 */
-	Map<Point, LandBlock> getBuiltupLand()
+	public Map<Point, LandBlock> getBuiltupLand()
 	{
 		builtupLand.clear();
 		
@@ -859,8 +859,8 @@ public class CitySimulation
 	/**
 	 * Get total capacity of collection of OccupiedBuilding
 	 * 
-	 * @param buildings
-	 * @return
+	 * @param buildings List of OccupiedBuildings
+	 * @return combined capacity of buildings in list
 	 */
 	public int getTotalCapacity(List<OccupiedBuilding> buildings)
 	{
@@ -875,8 +875,8 @@ public class CitySimulation
 	/**
 	 * Get total number of occupants of collection of OccupiedBuilding
 	 * 
-	 * @param buildings
-	 * @return
+	 * @param buildings List of OccupiedBuildings
+	 * @return combined number of occupants of buildings in list
 	 */
 	public int getTotalOccupants(List<OccupiedBuilding> buildings)
 	{
@@ -889,14 +889,13 @@ public class CitySimulation
 	}
 	
 	/**
-	 * Create map of buildings using recreation/police/fire figures
+	 * Create map of wellbeing  using recreation/police/fire figures
 	 * 
 	 * Value stored is number of recreation facilities covering building 
 	 * 
-	 * @param recreationMap
-	 * @return
+	 * @return wellbeing values for all buildings 
 	 */
-	public Map<Building, Double> getWellBeing(Map<LandBlock, Integer> recreationMap)
+	public Map<Building, Double> getWellBeing()
 	{
 		Map<Building, Double> wellBeingMap = new HashMap<Building, Double>();
 		
@@ -914,7 +913,7 @@ public class CitySimulation
 */		 
 		for (Building bldg : this.buildingRegister.keySet())
 		{
-			Integer rec = recreationMap.get(bldg.getLocation());
+			Integer rec = recreationCover.get(bldg.getLocation());
 
 			wellBeingMap.put(bldg, (rec == null ? 1d : (double) rec));
 		}
@@ -1069,7 +1068,7 @@ public class CitySimulation
 	 * Calculate total tax revenue for all taxable buildings
 	 * 
 	 * @param month game simulation month
-	 * @return
+	 * @return total required tax revenue for given month
 	 */
 	public double getTotalTaxRevenue(int month)
 	{
@@ -1104,8 +1103,8 @@ public class CitySimulation
 	/**
 	 * Calculate total tax spend for all municipal buildings
 	 * 
-	 * @param month
-	 * @return
+	 * @param month simulation month
+	 * @return total required tax expenditure for given month
 	 */
 	public double getTotalTaxSpend(int month)
 	{
@@ -1152,7 +1151,7 @@ public class CitySimulation
 		// find health level
 		cityHealthLevel = getCityHealthLevel(hospitals.size(), totalPopulation);
 		
-		Map<Building, Double> wellBeingMap = getWellBeing(recreationCover);
+		Map<Building, Double> wellBeingMap = getWellBeing();
 		
 		double change;
 		int workforceDelta = (int) (workVacancies * VACANCY_FILL_RATE);
